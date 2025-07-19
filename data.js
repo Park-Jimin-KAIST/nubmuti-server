@@ -1,29 +1,29 @@
-const player = [
-    {
-        id: '', // 소켓 ID
-        name: '', // 플레이어 이름
-        hand: [], // 손에 쥐고 있는 카드 배열
-        rank: 'nubjuki', // | 'lkh' | 'rsy' | 'prof' | 'freshman' | 'sixth' | 'seventh' | 'undergrad' | 'over-year' | 'grad', // 계급: 1 ~ # of players
-        isReady: false, // 준비 여부
-        hasPasses: false, // 현재 턴에서의 패스 여부
-    }
-];
+// const player = [
+//     {
+//         id: '', // 소켓 ID
+//         name: '', // 플레이어 이름
+//         hand: [], // 손에 쥐고 있는 카드 배열
+//         rank: 'nubjuki', // | 'lkh' | 'rsy' | 'prof' | 'freshman' | 'sixth' | 'seventh' | 'undergrad' | 'over-year' | 'grad', // 계급: 1 ~ # of players
+//         isReady: false, // 준비 여부
+//         hasPasses: false, // 현재 턴에서의 패스 여부
+//     }
+// ];
 
-const participants = [
-    {
-      id: '', 
-      name: '', 
-      hand: [], 
-      rank: '', 
-      isReady: false, 
-      hasPasses: false,
-    },
-    // 다른 플레이어들...
-  ];
+/**
+ * 플레이어 생성자 함수
+ * @param {string} id 소켓 ID
+ * @param {string} name 플레이어 이름
+ */
+function Player(id, name) {
+    this.id = id; // 소켓 ID
+    this.name = name; // 플레이어 이름
+    this.hand = []; // 손에 쥐고 있는 카드 배열
+    this.rank = null; // 계급: 'nubjuki' | 'lkh' | 'rsy' | 'prof' | 'freshman' | 'sixth' | 'seventh' | 'undergrad' | 'over-year' | 'grad'
+    this.hasPasses = false; // 현재 턴에서의 패스 여부
+}
 
-const gameState = {
+const baseGameState = {
     phase: 'waiting' | 'exchange' | 'playing' | 'ended', // 게임 상태: [waiting, cardExchange, playing, ended]
-    participants: [], // 플레이어 목록
     turn: { //현재 턴 정보
         currentPlayerIndex: 0,
         order: [], //턴 순서 배열 - 소켓 ID 배열, 
@@ -64,24 +64,9 @@ const deck = {
             'Goose', 'Duck'] // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
 };
 
-// const room = {
-//     id: 'room1', // 방 아이디
-//     hostID: '', // 방장 소켓 ID
-//     maxPlayers: 6, // 최대 플레이어 수
-//     createdAt: new Date.now(), // 방 생성 시간
-// };
-
-const flags = {
-    isGameStarted: false, // 게임 시작 여부
-    isExchangePhase: false, // 카드 교환 단계 여부
-    exchangeCount: 0, // 카드 교환 횟수
-};
-
 module.exports = {
-    player, // 플레이어 목록 
-    participants, // 참가자 목록
-    gameState, // 게임 상태
+    // player, // 플레이어 목록 
     deck, // 카드 덱
-    room, // 방 정보
-    flags, // 플래그 정보
+    baseGameState, // 게임 상태 기본 구조
+    Player, // 플레이어 생성자 함수
 };

@@ -1,22 +1,21 @@
 const data = require('../data');
 const { shuffleArray } = require('./utils');
+const { room } = require('../roomManager');
 
 /**
  * 카드 덱 셔플
  */
-
 function shuffleDeck(deck) {
     return shuffleArray([...deck]); // 카드 덱 셔플 + data.deck에 직접 접근하지 않음 (데이터 분리)
 }
 
-const shuffledDeck = shuffleDeck(data.deck.cards);
-
 /**
  * 플레이어별 카드 분배
- * @param {Array} participants - player[] // 소켓 ID, 플레이어 이름, 손에 쥐고 있는 카드 배열, 계급, 준비 여부, 현재 턴에서의 패스 여부
- * @param {Array} shuffledDeck - 셔플된 카드 덱
+ * @param {Array} shuffledDeck 셔플된 카드 덱
  */
-function dealCards(participants, shuffledDeck) {
+function dealCards(shuffledDeck) {
+    const participants = room.participants;
+    
     participants.forEach(player => player.hand = []);
 
     let playerCount = participants.length;
@@ -28,10 +27,11 @@ function dealCards(participants, shuffledDeck) {
 
 /**
  * 카드 교환 단계
- * @param {Array} participants - players[] // 전체 플레이어 목록, players 객체들의 배열
- * @param {Array} selectedCards - { fromPlayerId: string, toPlayerId: string, cards: number[] } // 프론트엔드에서 받아온 카드 교환 정보를 담은 배열
+ * @param {Object} selectedCards 프론트엔드에서 받은 교환 카드 정보
  */
-function exchangeCards(participants, selectedCards) {
+function exchangeCards(selectedCards) {
+    const participants = room.participants;
+    
     participants.sort((a, b) => b.rank - a.rank); // 계급 내림차순 정렬
 
     const mainExchangeCount = 2; //넙죽이가 대학원생에게 줄 카드 수
@@ -77,3 +77,9 @@ function exchangeCards(participants, selectedCards) {
     high2.hand.push(...low2Give);
     low2.hand.push(...high2Give);
 }
+
+module.exports = {
+    shuffleDeck,
+    dealCards,
+    exchangeCards
+};

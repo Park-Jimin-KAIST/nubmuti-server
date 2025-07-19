@@ -8,7 +8,7 @@ const PACKET_TYPE = {
     // Room
     ENTER_ROOM: 1001,
     LEAVE_ROOM: 1002,
-    GET_ROOM_LIST: 1003,
+    GET_ROOM_INFO: 1003,
     CREATE_ROOM: 1004,
     READY_GAME: 1011,
   
