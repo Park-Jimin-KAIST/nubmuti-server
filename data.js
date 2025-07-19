@@ -1,9 +1,9 @@
-const players = [
+const player = [
     {
         id: '', // 소켓 ID
         name: '', // 플레이어 이름
         hand: [], // 손에 쥐고 있는 카드 배열
-        rank: null, // 계급: [넙죽이, 이광형, 류석영 , ... , 대학원생]
+        rank: null, // 계급: 1 ~ # of players
         isReady: false, // 준비 여부
         hasPasses: false, // 현재 턴에서의 패스 여부
     }
@@ -18,7 +18,17 @@ const gameState = {
 };
 
 const deck = {
-    cards: [], // 초기 카드 배열 [넙죽이, 이광형, 이광형, 류석영, 류석영, 류석영, ... , 대학원생, 대학원생, 대학원생]
+    cards: [1, 
+            2, 2, 
+            3, 3, 3, 
+            4, 4, 4, 4, 
+            5, 5, 5, 5, 5, 
+            6, 6, 6, 6, 6, 6, 
+            7, 7, 7, 7, 7, 7, 7, 
+            8, 8, 8, 8, 8, 8, 8, 8, 
+            9, 9, 9, 9, 9, 9, 9, 9, 9, 
+            10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+            'Goose', 'Duck'],
     discardPile: [], // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
 };
 
@@ -36,7 +46,7 @@ const flags = {
 };
 
 module.exports = {
-    players, // 플레이어 목록 
+    player, // 플레이어 목록 
     gameState, // 게임 상태
     deck, // 카드 덱
     room, // 방 정보
