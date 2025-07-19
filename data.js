@@ -3,11 +3,23 @@ const player = [
         id: '', // 소켓 ID
         name: '', // 플레이어 이름
         hand: [], // 손에 쥐고 있는 카드 배열
-        rank: null, // 계급: 1 ~ # of players
+        rank: 'nubjuki', // | 'lkh' | 'rsy' | 'prof' | 'freshman' | 'sixth' | 'seventh' | 'undergrad' | 'over-year' | 'grad', // 계급: 1 ~ # of players
         isReady: false, // 준비 여부
         hasPasses: false, // 현재 턴에서의 패스 여부
     }
 ];
+
+const participants = [
+    {
+      id: '', 
+      name: '', 
+      hand: [], 
+      rank: '', 
+      isReady: false, 
+      hasPasses: false,
+    },
+    // 다른 플레이어들...
+  ];
 
 const gameState = {
     phase: 'waiting' | 'exchange' | 'playing' | 'ended', // 게임 상태: [waiting, cardExchange, playing, ended]
@@ -52,12 +64,12 @@ const deck = {
             'Goose', 'Duck'] // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
 };
 
-const room = {
-    id: 'room1', // 방 아이디
-    hostID: '', // 방장 소켓 ID
-    maxPlayers: 6, // 최대 플레이어 수
-    createdAt: new Date.now(), // 방 생성 시간
-};
+// const room = {
+//     id: 'room1', // 방 아이디
+//     hostID: '', // 방장 소켓 ID
+//     maxPlayers: 6, // 최대 플레이어 수
+//     createdAt: new Date.now(), // 방 생성 시간
+// };
 
 const flags = {
     isGameStarted: false, // 게임 시작 여부
@@ -67,6 +79,7 @@ const flags = {
 
 module.exports = {
     player, // 플레이어 목록 
+    participants, // 참가자 목록
     gameState, // 게임 상태
     deck, // 카드 덱
     room, // 방 정보
