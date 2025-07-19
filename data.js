@@ -10,10 +10,31 @@ const player = [
 ];
 
 const gameState = {
-    phase: 'waiting', // 게임 상태: [waiting, cardExchange, playing, ended]
-    currentTurn: null, // 현재 턴 플레이어
-    lastPlay: null, // 마지막 플레이 카드 정보
-    turnOrder: [], // 턴 순서 (소켓 ID 배열)
+    phase: 'waiting' | 'exchange' | 'playing' | 'ended', // 게임 상태: [waiting, cardExchange, playing, ended]
+    participants: [], // 플레이어 목록
+    turn: { //현재 턴 정보
+        currentPlayerIndex: 0,
+        order: [], //턴 순서 배열 - 소켓 ID 배열, 
+        lastPlay: {
+            lastPlayer: '',
+            cardNumber: 0,
+            cardType: 'single' | 
+                      'double' | 
+                      'triple' | 
+                        'quad' | 
+                        'five' | 
+                         'six' | 
+                       'seven' | 
+                       'eight' | 
+                        'nine' | 
+                         'ten' |
+                       'eleven',
+        passCount: 0, // 패스 횟수
+        },
+    },
+    table: {
+        pile: [], // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
+    },
     round: 0, // 현재 라운드 수
 };
 
@@ -28,8 +49,7 @@ const deck = {
             8, 8, 8, 8, 8, 8, 8, 8, 
             9, 9, 9, 9, 9, 9, 9, 9, 9, 
             10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-            'Goose', 'Duck'],
-    discardPile: [], // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
+            'Goose', 'Duck'] // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
 };
 
 const room = {
