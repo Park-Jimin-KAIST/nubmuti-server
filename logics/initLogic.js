@@ -1,4 +1,4 @@
-const data = require('./data');
+const data = require('../data');
 const { shuffleArray } = require('./utils');
 
 /**
@@ -13,8 +13,8 @@ const shuffledDeck = shuffleDeck(data.deck.cards);
 
 /**
  * 플레이어별 카드 분배
- * @param {Array} participants: player[] // 소켓 ID, 플레이어 이름, 손에 쥐고 있는 카드 배열, 계급, 준비 여부, 현재 턴에서의 패스 여부
- * @param {Array} shuffledDeck 셔플된 카드 덱
+ * @param {Array} participants - player[] // 소켓 ID, 플레이어 이름, 손에 쥐고 있는 카드 배열, 계급, 준비 여부, 현재 턴에서의 패스 여부
+ * @param {Array} shuffledDeck - 셔플된 카드 덱
  */
 function dealCards(participants, shuffledDeck) {
     participants.forEach(player => player.hand = []);
