@@ -48,6 +48,7 @@ const baseGameState = {
         pile: [], // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
     },
     round: 0, // 현재 라운드 수
+    maxRound: 3,
 };
 
 const deck = {

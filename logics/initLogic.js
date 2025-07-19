@@ -1,6 +1,6 @@
 const data = require('../data');
 const { shuffleArray } = require('./utils');
-const { room } = require('../roomManager');
+const { room } = require('../managers/roomManager');
 
 /**
  * 카드 덱 셔플
