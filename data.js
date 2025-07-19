@@ -17,16 +17,21 @@
 function Player(id, name) {
     this.id = id; // 소켓 ID
     this.name = name; // 플레이어 이름
-    this.hand = []; // 손에 쥐고 있는 카드 배열
+    this.hand = []; // 
     this.rank = null; // 계급: 1 ~ # of players
     this.hasPasses = false; // 현재 턴에서의 패스 여부
+}
+
+const cards = {
+    number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 'Goose' | 'Duck',
+    type: 'single' | 'double' | 'triple' | 'quad' | 'five' | 'six' | 'seven' | 'eight' | 'nine' | 'ten' | 'eleven',
 }
 
 const baseGameState = {
     phase: 'waiting' | 'exchange' | 'playing' | 'ended', // 게임 상태: [waiting, cardExchange, playing, ended]
     turn: { //현재 턴 정보
-        currentPlayer: null, // 현재 턴 플레이어 소켓 ID로 할지 플레이어 객체로 할지 결정 필요
-        order: [], //턴 순서 배열 - 소켓 ID 배열
+        currentPlayer: null, // 현재 턴 플레이어 객체
+        order: [], //턴 순서 배열 - 플레이어 객체 배열
         lastPlay: {
             lastPlayer: '',
             cardNumber: 0,
@@ -41,8 +46,8 @@ const baseGameState = {
                         'nine' | 
                          'ten' |
                        'eleven',
-        passCount: 0, // 패스 횟수
         },
+        passCount: 0, // 패스 횟수
     },
     table: {
         pile: [], // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
@@ -63,7 +68,7 @@ const deck = {
             8, 8, 8, 8, 8, 8, 8, 8, 
             9, 9, 9, 9, 9, 9, 9, 9, 9, 
             10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-            'Goose', 'Duck'] // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
+            'Goose', 'Duck']
 };
 
 module.exports = {
@@ -71,4 +76,5 @@ module.exports = {
     deck, // 카드 덱
     baseGameState, // 게임 상태 기본 구조
     Player, // 플레이어 생성자 함수
+    cards, // 카드 목록
 };

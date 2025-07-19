@@ -19,15 +19,18 @@ const PACKET_TYPE = {
     // Round
     START_ROUND: 1020,
     END_ROUND: 1021,
-    PLAY_CARD: 1022,
-    PASS: 1023,
-    END_TURN: 1024,  
-    DONE_ROUND: 1025,
+    YOUR_TURN: 1022,
+    PLAY_CARD: 1023,
+    PASS: 1024,
+    ALL_PASSED: 1025,
+    END_TURN: 1026,  
+    DONE_ROUND: 1027,
 
     // Exeption
     INVALID_CARD: 1030,
     OUT_OF_TURN: 1031,
     RETRY_CARD: 1032,
+    CANT_ENTER_ROOM: 1033,
 
     // Auth
     LOGIN: 4001,

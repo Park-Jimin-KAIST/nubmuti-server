@@ -1,6 +1,6 @@
 const { room, initRoom } = require('../roomManager');
 const { getRoomInfo } = require('../roomManager');
-const { initializeGame } = require('./initManager');
+const { shuffleDeck, dealCards } = require('./initManager');
 const { deck } = require('../data');
 
 /**
@@ -22,7 +22,7 @@ function startGame(playerId) {
     if (!room.flags.isEnoughPlayers) {
         return { 
             success: false, 
-            message: `최소 ${room.minPlayers}명 이상 필요합니다.` 
+            message: `최소 4명 이상 필요합니다.` 
         };
     }
 
@@ -45,6 +45,14 @@ function startGame(playerId) {
         gameState: room.gameState,
         roomInfo: getRoomInfo()
     };
+}
+
+/**
+ * 게임 종료 조건 확인
+ * @returns {boolean}
+ */
+function isGameOver() {
+    return room.gameState.round > room.gameState.maxRound;
 }
 
 /**
