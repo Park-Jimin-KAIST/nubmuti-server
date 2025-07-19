@@ -15,7 +15,20 @@ const PACKET_TYPE = {
     // Game
     START_GAME: 1010,
     END_GAME: 3000,
-  
+
+    // Round
+    START_ROUND: 1020,
+    END_ROUND: 1021,
+    PLAY_CARD: 1022,
+    PASS: 1023,
+    END_TURN: 1024,  
+    DONE_ROUND: 1025,
+
+    // Exeption
+    INVALID_CARD: 1030,
+    OUT_OF_TURN: 1031,
+    RETRY_CARD: 1032,
+
     // Auth
     LOGIN: 4001,
     CREATE_ACCOUNT: 4000,

@@ -18,15 +18,15 @@ function Player(id, name) {
     this.id = id; // 소켓 ID
     this.name = name; // 플레이어 이름
     this.hand = []; // 손에 쥐고 있는 카드 배열
-    this.rank = null; // 계급: 'nubjuki' | 'lkh' | 'rsy' | 'prof' | 'freshman' | 'sixth' | 'seventh' | 'undergrad' | 'over-year' | 'grad'
+    this.rank = null; // 계급: 1 ~ # of players
     this.hasPasses = false; // 현재 턴에서의 패스 여부
 }
 
 const baseGameState = {
     phase: 'waiting' | 'exchange' | 'playing' | 'ended', // 게임 상태: [waiting, cardExchange, playing, ended]
     turn: { //현재 턴 정보
-        currentPlayerIndex: 0,
-        order: [], //턴 순서 배열 - 소켓 ID 배열, 
+        currentPlayer: null, // 현재 턴 플레이어 소켓 ID로 할지 플레이어 객체로 할지 결정 필요
+        order: [], //턴 순서 배열 - 소켓 ID 배열
         lastPlay: {
             lastPlayer: '',
             cardNumber: 0,
@@ -49,6 +49,7 @@ const baseGameState = {
     },
     round: 0, // 현재 라운드 수
     maxRound: 3,
+    roundResults: [], // 최종 라운드 결과대로 배열, 다음 라운드 순서 결정에 사용
 };
 
 const deck = {

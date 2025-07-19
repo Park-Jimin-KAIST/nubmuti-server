@@ -1,6 +1,6 @@
 const { room, initRoom } = require('../roomManager');
 const { getRoomInfo } = require('../roomManager');
-const { shuffleDeck, dealCards } = require('../logics/initLogic');
+const { initializeGame } = require('./initManager');
 const { deck } = require('../data');
 
 /**
@@ -38,10 +38,6 @@ function startGame(playerId) {
     room.flags.isGameStarted = true;
     room.gameState.phase = 'playing';
     room.gameState.round = 1;
-
-    // 카드 분배
-    const shuffledDeck = shuffleDeck(deck.cards);
-    dealCards(shuffledDeck);
 
     return { 
         success: true, 
