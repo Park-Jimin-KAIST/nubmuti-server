@@ -98,11 +98,11 @@ function createRoom(playerId, playerName) {
  * 방 입장
  * 방이 이미 생성되어 있는 상태에서 참가자가 접속할 때 실행
  * @param {string} playerId 소켓 ID
- * @param {string} playerName 플레이어 이름
+ * @param {string} nickname 플레이어 이름
  * @returns {Object} 결과 정보
  * @event ENTER_ROOM: 1001
  */
-function enterRoom(playerId, playerName) {
+function enterRoom(playerId, nickname) {
     // 방이 생성되지 않은 경우
     if (!room.flags.isRoomCreated) {
         return { 
@@ -137,7 +137,7 @@ function enterRoom(playerId, playerName) {
     }
 
     // 새 플레이어 생성
-    const newPlayer = new Player(playerId, playerName);
+    const newPlayer = new Player(playerId, nickname);
 
     // 참가자 목록에 추가
     room.gameState.participants.push(newPlayer);
@@ -161,7 +161,7 @@ function leaveRoom(playerId) {
     if (playerIndex === -1) {
         return { 
             success: false, 
-            message: '방에 입장하지 않은 플레이어입니다.' 
+            message: '방에 입장하지 않은 플레이어입니다.'
         };
     }
 
