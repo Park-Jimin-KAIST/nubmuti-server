@@ -88,6 +88,7 @@ function createRoom(ws, nickname) {
     room.hostWS = ws;
     newPlayer.isHost = true;
     room.gameState.participants.push(newPlayer);
+    room.flags.isRoomCreated = true;
 
     return { 
         success: true,
@@ -206,5 +207,7 @@ module.exports = {
     getRoomInfo,
     leaveRoom,
     enterRoom,
+    isReady,
+    isHost,
     initRoom
 };

@@ -29,12 +29,13 @@ wss.on('error', (error) => {
 });
 
 // WebSocket 연결 처리
-wss.on('connection', (ws) => {
-    console.log('클라이언트 연결됨');
-    
-    // 클라이언트 정보 추가
-    // ws.clientId = generateClientId();
-    // ws.isAlive = true;
+wss.on('connection', (ws, req) => {
+    // 클라이언트 IP 주소 가져오기 (프록시 환경에 따라 다를 수 있음)
+    const ip = req.socket.remoteAddress;
+    const now = new Date().toLocaleString();
+    console.log(`[${now}] 새 클라이언트 접속! IP: ${ip}`);
+
+    // 필요하다면 ws에 고유 ID 부여 등 추가
     
     // 각 핸들러 등록
     // handleCommonEvents(ws, wss);

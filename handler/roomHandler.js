@@ -14,7 +14,8 @@ function handleRoomEvents(ws, wss) {
         switch (type) {
             case PACKET_TYPE.CREATE_ROOM:
                 const createResult = createRoom(ws, data.nickname);
-                sendToClient(ws, PACKET_TYPE.ENTER_ROOM, roomInfo.participants.length);
+                sendToClient(ws, PACKET_TYPE.CREATE_ROOM, createResult);
+                sendToClient(ws, PACKET_TYPE.ENTER_ROOM, room.participants.length);
                 sendToClient(ws, PACKET_TYPE.YOU_ARE_HOST, createResult);
                 break;
 
@@ -24,12 +25,12 @@ function handleRoomEvents(ws, wss) {
                     return;
                 }
                 const result = enterRoom(ws, data.nickname);
-                sendToClient(ws, PACKET_TYPE.ENTER_ROOM, roomInfo.participants.length);
+                sendToClient(ws, PACKET_TYPE.ENTER_ROOM, room.participants.length);
 
                 if (result.success) {
                     // const roomInfo = getRoomInfo();
                     broadcastToAll(wss, PACKET_TYPE.PLAYER_COUNT_CHANGED, {
-                        participantCount: roomInfo.participants.length,
+                        participantCount: room.participants.length,
                         maxPlayer: 6
                     });
                 }
@@ -48,7 +49,7 @@ function handleRoomEvents(ws, wss) {
                 if (leaveResult.success) {
                     const roomInfo = getRoomInfo();
                     broadcastToAll(wss, PACKET_TYPE.PLAYER_COUNT_CHANGED, {
-                        participantCount: roomInfo.participants.length,
+                        participantCount: room.participants.length,
                         maxPlayer: 6
                     });
                     broadcastToAll(wss, PACKET_TYPE.YOU_ARE_HOST, isHost(ws.clientId));
