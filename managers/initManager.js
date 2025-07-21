@@ -1,4 +1,3 @@
-const { TbRuler } = require('react-icons/tb');
 const data = require('../data');
 const { shuffleArray } = require('./logics/utils');
 const { room } = require('./roomManager');

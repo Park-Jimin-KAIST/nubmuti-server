@@ -15,7 +15,7 @@ const wss = new WebSocket.Server({ server });
 
 // 핸들러들 import
 const { handleRoomEvents } = require('./handler/roomHandler');
-const { handleGameEvents } = require('./handler/gameHandler');
+const { handleGameEvents } = require('./handler/gamehandler');
 const { handleRoundEvents } = require('./handler/roundHandler');
 // const { handleCommonEvents } = require('./handler/commonHandler');
 
@@ -33,11 +33,11 @@ wss.on('connection', (ws) => {
     console.log('클라이언트 연결됨');
     
     // 클라이언트 정보 추가
-    ws.clientId = generateClientId();
-    ws.isAlive = true;
+    // ws.clientId = generateClientId();
+    // ws.isAlive = true;
     
     // 각 핸들러 등록
-    handleCommonEvents(ws, wss);
+    // handleCommonEvents(ws, wss);
     handleRoomEvents(ws, wss);
     handleGameEvents(ws, wss);
     handleRoundEvents(ws, wss);

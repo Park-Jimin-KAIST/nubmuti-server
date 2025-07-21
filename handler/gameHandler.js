@@ -24,3 +24,7 @@ function handleGameEvents(ws, wss) {
         }
     });
 }
+
+module.exports = {
+    handleGameEvents
+};
