@@ -1,6 +1,6 @@
 const { PACKET_TYPE } = require('../socket/event');
-const { enterRoom, getRoomInfo } = require('../managers/roomManager');
-const { sendToClient } = require('../../server')
+const { enterRoom, getRoomInfo, createRoom, leaveRoom, isReady, isHost } = require('../managers/roomManager');
+const { sendToClient, parseMessage, sendError, broadcastToAll } = require('../socket/websocketUtils');
 
 function handleRoomEvents(ws, wss) {
     ws.on('message', (msg) => {
@@ -28,13 +28,9 @@ function handleRoomEvents(ws, wss) {
 
                 if (result.success) {
                     // const roomInfo = getRoomInfo();
-                    wss.clients.forEach(client => {
-                        if (client.readyState === ws.OPEN) {
-                            sendToClient(client, PACKET_TYPE.PLAYER_COUNT_CHANGED, {
-                                participantCount: roomInfo.participants.length,
-                                maxPlayer: 6
-                            });
-                        }
+                    broadcastToAll(wss, PACKET_TYPE.PLAYER_COUNT_CHANGED, {
+                        participantCount: roomInfo.participants.length,
+                        maxPlayer: 6
                     });
                 }
 
@@ -51,17 +47,11 @@ function handleRoomEvents(ws, wss) {
 
                 if (leaveResult.success) {
                     const roomInfo = getRoomInfo();
-                    wss.clients.forEach(client => {
-                        if (client.readyState === ws.OPEN) {
-                            sendToClient(client, PACKET_TYPE.PLAYER_COUNT_CHANGED, {
-                                participantCount: roomInfo.participants.length,
-                                maxPlayer: 6
-                            })
-                        }
-                        if (client.readyState === ws.OPEN) {
-                            sendToClient(client, PACKET_TYPE.YOU_ARE_HOST, isHost(ws.clientId))
-                        }
+                    broadcastToAll(wss, PACKET_TYPE.PLAYER_COUNT_CHANGED, {
+                        participantCount: roomInfo.participants.length,
+                        maxPlayer: 6
                     });
+                    broadcastToAll(wss, PACKET_TYPE.YOU_ARE_HOST, isHost(ws.clientId));
                 }
 
                 if (isReady()) {

@@ -18,10 +18,14 @@ const PACKET_TYPE = {
     END_GAME: 3000, // 완전히 종료됐을 때 필요한 UI
 
     // Round
+    NEW_ROUND: 1019, // 새로운 라운드 시작
     START_ROUND: 1020, // Round1 등등 알아서 구현 ^^
     END_ROUND: 1021, // round 변수 변하면 모든 클라이언트한테 시그널 보내서 round 올라간 UI
     FIRST_ROUND_RULES: 1022, // 1라운드 규칙 알려주는 UI "첫번째 라운드는 무작위로 분배된 카11드의 랭크대로 순서가 정해집니다"
-    YOUR_CARD: 1023, // 무작위로 나에게 분배된 카드를 나타내는 UI "당신의 카드는 이광형입니다"
+    SHUFFLE_CARDS: 1023, // 카드 섞는 UI
+    DEAL_ONE_CARD: 1024, // 카드를 한장만 나눠주는 애니메이션
+    UPDATE_HAND: 1025, // 카드 분배 안내 "카드를 분배합니다"
+    YOUR_CARD: 1026, // 무작위로 나에게 분배된 카드를 나타내는 UI "당신의 카드는 이광형입니다"
     YOUR_RANK: 1103, // 내 계급 안내 "$room.gameState.round번째 라운드 당신의 계급은 이광형입니다"
     YOUR_ORDER: 1104, // 내 순서 안내 "순서는 2번째입니다"
     ROUND_STARTED: 1105, // 라운드 시작 안내 "1라운드가 시작되었습니다"

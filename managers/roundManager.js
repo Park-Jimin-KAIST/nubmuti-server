@@ -26,43 +26,43 @@ function startRound() {
 
 /**
  * 카드 내기
- * @param {string} playerId 제출 버튼을 누른 참가자의 소켓 ID
+ * @param {WebSocket} ws 제출 버튼을 누른 참가자의 소켓 ID
  * @param {Array} cards 참가자가 제출 버튼을 눌러 낸 카드 배열, 프론트엔드에서 넘어온 정보
  * @returns {Object}
  */
-function playCard(playerId, cards) {
+function playCard(ws, cards) {
     // 1. Check if it's the player's turn
-    if (room.gameState.turn.currentPlayer !== playerId) {
+    if (room.gameState.turn.currentPlayer.ws !== ws) {
         return { success: false, message: '당신의 턴이 아닙니다'};
     }
     // 2. Check validity of the cards
     const isValid = validatePlay(cards);
     if (!isValid.success) {
+        sendToClient(ws, PACKET_TYPE.INVALID_CARD, { message: isValid.message });
         return { success: false, message: isValid.message };
     }
 
     // 3. Put the cards on the table
-    room.gameState.table.pile.push({ playerId, cards });
+    room.gameState.table.pile.push({ ws, cards });
 
     // 4. Remove the cards from the player's hand
-    const player = room.participants.find(p => p.id === playerId);
+    const player = room.participants.find(p => p.ws === ws);
     cards.forEach(card => {
         const index = player.hand.indexOf(card);
         if (index !== -1) {
             player.hand.splice(index, 1);
         }
     });
-    const isDone = player.hand.length === 0;
-    if (isDone) {
-        excludeFinishedPlayer(playerId);
-    }
+    // const isDone = player.hand.length === 0;
+    // if (isDone) {
+    //     excludeFinishedPlayer(ws);
+    // }
 
     // 5. Next turn
     room.gameState.turn.passCount = 0; // Reset pass count after a card is played
-    nextTurn();
-
-    return { success: true, message: '카드를 내었습니다', isDone, playerId }; // 추후 프론트엔드와 논의 후 게임 스테이트 반환 여부 결정
+    return { success: true, message: '카드를 내었습니다', isDone, ws }; // 추후 프론트엔드와 논의 후 게임 스테이트 반환 여부 결정
 }
+
 // roundHandler.js
 //    const { playCard } = require('./roundManager');
 //    socket.on('PLAY_CARD', (data) => {
@@ -74,12 +74,12 @@ function playCard(playerId, cards) {
 // a client requests PLAY_CARD event -> call playCard function  -> if the player has no cards left, server sends DONE_ROUND event
 /**
  * 패스
- * @param {string} playerId
+ * @param {WebSocket} ws
  * @returns {Object}
  */
-function pass(playerId) {
+function pass(ws) {
     // 1. Check if it's the player's turn
-    if (room.gameState.turn.currentPlayer.id !== playerId) {
+    if (room.gameState.turn.currentPlayer.ws !== ws) {
         return { success: false, message: '당신의 턴이 아닙니다'};
     }
 
@@ -88,14 +88,14 @@ function pass(playerId) {
     room.gameState.turn.passCount++;
 
     // 3. Next turn
-    nextTurn();
+    // nextTurn();
 
-    // 4. Check if all players have passed
-    if (isAllPassed()) {
-        room.gameState.table.pile = [];
-        room.gameState.turn.passCount = 0;
-        return { success: true, message: '모두 패스했습니다'};
-    }
+    // // 4. Check if all players have passed
+    // if (isAllPassed()) {
+    //     room.gameState.table.pile = [];
+    //     room.gameState.turn.passCount = 0;
+    //     return { success: true, message: '모두 패스했습니다'};
+    // }
 
     return { success: true, message: '패스했습니다'};
 }
@@ -167,30 +167,39 @@ function validatePlay(cards) {
 
 /**
  * 플레이어를 order, participants에서 제외하고 finishedPlayers에 추가
- * @param {string} playerId // the same playerId as the one in the playCard function
+ * @param {WebSocket} ws // the same playerId as the one in the playCard function
+ * @returns {Object} { nickname, message }
  */
-function excludeFinishedPlayer(playerId) {
+function excludeFinishedPlayer(ws) {
     // order에서 제거
     const order = room.gameState.turn.order;
-    const idx = order.indexOf(playerId);
+    const idx = order.indexOf(ws);
     if (idx !== -1) order.splice(idx, 1);
 
     // participants에서 제거 및 플레이어 정보 저장
-    const pIdx = room.participants.findIndex(p => p.id === playerId);
-    let playerInfo;
+    const pIdx = room.participants.findIndex(p => p.ws === ws);
+    let finishedPlayer;
     if (pIdx !== -1) {
-        playerInfo = room.participants.splice(pIdx, 1)[0];
+        finishedPlayer = room.participants.splice(pIdx, 1)[0];
     }
 
     // finishedPlayers에 추가
     if (!room.gameState.finishedPlayers) room.gameState.finishedPlayers = [];
-    if (playerInfo) {
+    let nickname = '';
+    if (finishedPlayer) {
+        nickname = finishedPlayer.nickname;
         room.gameState.finishedPlayers.push({
-            id: playerInfo.id,
-            nickname: playerInfo.nickname,
+            ws: finishedPlayer.ws,
+            nickname: finishedPlayer.nickname,
             rank: room.gameState.finishedPlayers.length + 1
         });
     }
+
+    // 닉네임과 메시지 리턴
+    return {
+        nickname,
+        message: `${nickname}님이 라운드를 끝냈습니다!`
+    };
 }
 
 /** 
@@ -215,7 +224,7 @@ function endRound() {
         // finishedPlayers에 추가
         if (!room.gameState.finishedPlayers) room.gameState.finishedPlayers = [];
         room.gameState.finishedPlayers.push({
-            id: lastPlayer.id,
+            ws: lastPlayer.ws,
             nickname: lastPlayer.nickname,
             rank: room.gameState.finishedPlayers.length + 1
         });
@@ -238,4 +247,13 @@ function endRound() {
         success: false,
         message: '아직 라운드 종료 조건이 아닙니다'
     };
+}
+
+module.exports = {
+    getCurrentPlayer,
+    startRound,
+    playCard,
+    pass,
+    nextTurn,
+    endRound
 }

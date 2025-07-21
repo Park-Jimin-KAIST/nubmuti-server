@@ -21,9 +21,9 @@ function sendToClient(ws, type, data) {
  */
 function broadcastToAll(wss, type, data) {
     const message = JSON.stringify({ type, data });
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
+    wss.clients.forEach((ws) => {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(message);
         }
     });
 }
@@ -100,4 +100,55 @@ function updateClientInfo(ws, info) {
     ws.clientInfo = info;
 }
 
+/**
+ * 각 클라이언트에게 각자 다른 정보를 전송
+ * @param {Array} participants 참가자 배열 (각 객체에 ws와 원하는 데이터가 있어야 함)
+ * @param {string} type 이벤트 타입
+ * @param {function} dataFn (player) => data  // 각 플레이어별로 보낼 데이터를 반환하는 함수
+ */
+function sendEachClient(participants, type, dataFn) {
+    participants.forEach(player => {
+        if (player.ws && player.ws.readyState === WebSocket.OPEN) {
+            const data = dataFn(player);
+            sendToClient(player.ws, type, data);
+        }
+    });
+}
+
+/**
+ * 특정 클라이언트에게 오름차순으로 정렬된 hand와 UPDATE_HAND 시그널을 전송
+ * @param {WebSocket} ws 클라이언트 소켓
+ * @param {Array<number>} hand 플레이어의 패 배열
+ */
+function sendUpdateHand(ws, hand) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        const sortedHand = hand.slice().sort((a, b) => a - b);
+        sendToClient(ws, 'UPDATE_HAND', { hand: sortedHand });
+    }
+}
+
+/**
+ * 전체 참가자에게 각자의 오름차순 정렬된 hand와 UPDATE_HAND 시그널을 전송
+ * @param {Array} participants 참가자 배열 (각 객체에 ws, hand가 있어야 함)
+ */
+function sendUpdateHandAll(participants) {
+    sendEachClient(participants, 'UPDATE_HAND', (player) => {
+        const sortedHand = player.hand.slice().sort((a, b) => a - b);
+        return { hand: sortedHand };
+    });
+}
+
+
 /** */
+module.exports = {
+    sendToClient,
+    broadcastToAll,
+    parseMessage,
+    validateMessage,
+    sendError,
+    getConnectedClientsCount,
+    updateClientInfo,
+    sendEachClient,
+    sendUpdateHand,
+    sendUpdateHandAll
+}

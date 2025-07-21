@@ -54,37 +54,6 @@ wss.on('connection', (ws) => {
     });
 });
 
-// 클라이언트 ID 생성
-function generateClientId() {
-    return Math.random().toString(36).substr(2, 9);
-}
-
-// 플레이어 연결 해제 처리
-function handlePlayerDisconnect(clientId) {
-    // 연결 해제된 플레이어 정리
-    console.log(`플레이어 ${clientId} 연결 해제 처리`);
-}
-
-// 유틸리티 함수들 (핸들러에서 사용)
-// 단일 클라이언트에게 메시지 전송
-function sendToClient(ws, type, data) {
-    const message = JSON.stringify({ type, data });
-    ws.send(message);
-}
-
-// 모든 클라이언트에게 메시지 전송
-function broadcastToAll(wss, type, data) {
-    const message = JSON.stringify({ type, data });
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
-    });
-}
-
-// 핸들러에서 사용할 수 있도록 export
-module.exports = { sendToClient, broadcastToAll };
-
 // 환경 변수로 포트 설정
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

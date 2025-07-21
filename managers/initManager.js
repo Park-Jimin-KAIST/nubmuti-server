@@ -38,20 +38,44 @@ function dealRankCards() {
     };
 
     // 참가자별로 카드 분배 및 결과 생성
-    const result = participants.map((player, idx) => {
+    participants.forEach((player, idx) => {
+        // 참가자 수보다 많은 카드가 있을 수 있으니, idx로 분배
         const cardNumber = shuffledRankDeck[idx];
-        const cardName = cardNameMap[cardNumber];
-        player.rankCard = cardNumber;
-        player.rank = cardName;
-        return {
-            success: true,
-            cardName,
-            message: `당신의 카드는 ${cardName}입니다`
-        };
+        player.rankCard = cardNameMap[cardNumber];
+        player.rankCardNumber = cardNumber; // 필요시 숫자도 저장
     });
-
-    return result;
 }
+/**
+ * 참가자들에게 이미 분배된 rankCard, rankCardNumber를 기준으로
+ * 카드 숫자가 낮은 순서대로 계급(rank)을 부여하는 함수
+ */
+function assignRanksByRankCard() {
+    const participants = room.participants;
+    const playerCount = participants.length;
+
+    // 플레이어 수에 따라 계급 이름 배열 설정
+    let rankNames;
+    if (playerCount === 4) {
+        rankNames = ['넙죽이', '이광형', '연차초과자', '대학원생'];
+    } else if (playerCount === 5) {
+        rankNames = ['넙죽이', '이광형', '류석영', '연차초과자', '대학원생'];
+    } else if (playerCount === 6) {
+        rankNames = ['넙죽이', '이광형', '류석영', '8번', '연차초과자', '대학원생'];
+    } else {
+        // 지원하지 않는 인원수일 경우
+        return { success: false, message: '지원하지 않는 플레이어 수입니다. (4~6명만 가능)' };
+    }
+
+    // rankCardNumber 기준 오름차순 정렬
+    const sortedPlayers = [...participants].sort((a, b) => a.rankCardNumber - b.rankCardNumber);
+
+    // 정렬된 순서대로 계급 부여
+    sortedPlayers.forEach((player, idx) => {
+        player.rank = rankNames[idx];
+    });
+}
+
+
 
 /**
  * 이전 라운드 결과로 계급 업데이트
@@ -108,6 +132,12 @@ function dealCards(shuffledDeck) {
         participants[playerIndex].hand.push(shuffledDeck[i]);
     }
 }
+
+/**
+ * 넙죽이와 꼴찌 플레이어의 패 교환
+ * @param {Array} cards 프론트엔드에서 받은 교환 카드 정보
+ */
+
 
 /**
  * 랭크 순서대로 턴 순서(order) 설정
@@ -207,6 +237,7 @@ module.exports = {
     shuffleDeck,
     dealCards,
     dealRankCards,
+    assignRanksByRankCard,
     setTurnOrder,
     // initializeGame,
     exchangeCards
