@@ -74,7 +74,7 @@ function createRoom(ws, nickname) {
     }
 
     // 이미 참가자가 있는 경우
-    if (room.gameState.participants.length > 0) {
+    if (room.participants.length > 0) {
         return { 
             success: false, 
             message: '이미 방에 참가자가 있습니다.' 
