@@ -11,15 +11,16 @@
 
 /**
  * 플레이어 생성자 함수
- * @param {string} id 소켓 ID
- * @param {string} name 플레이어 이름
+ * @param {string} ws 웹소켓 객체   
+ * @param {string} nickname 플레이어 이름
  */
-function Player(id, name) {
-    this.id = id; // 소켓 ID
-    this.name = name; // 플레이어 이름
+function Player(ws, nickname) {
+    this.ws = ws; // 웹소켓 객체
+    this.nickname = nickname; // 플레이어 이름
     this.hand = []; // 
     this.rank = null; // 계급: 1 ~ # of players
     this.hasPasses = false; // 현재 턴에서의 패스 여부
+    this.isHost = false; // 방장 여부
 }
 
 const cards = {
@@ -52,7 +53,7 @@ const baseGameState = {
     table: {
         pile: [], // 플레이 도중 플레이어들이 낸 (버린) 카드 배열
     },
-    round: 0, // 현재 라운드 수
+    round: 1, // 현재 라운드 수
     maxRound: 3,
     roundResults: [], // 최종 라운드 결과대로 배열, 다음 라운드 순서 결정에 사용
 };

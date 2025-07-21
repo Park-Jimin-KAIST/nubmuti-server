@@ -10,89 +10,47 @@ const { room } = require('./roomManager');
  * 숫자가 낮은 순서대로 rank가 높음
  * 첫 라운드에만 실행되고, 다음 라운드부터는 이전 라운드 결과로 계급 결정
  */
-function setRanksByDealingCards() {
-    if (room.gameState.round !== 1) return; // 첫 라운드에만 실행
+function dealRankCards() {
+    if (room.gameState.round !== 1) return { success: false, message: '첫 라운드가 아닙니다.' };
 
-    const participants = room.participants; // participants 복사
-    const playerCount = participants.length; // 참가자 수
-   
-    // 계급 결정용 카드 덱 (숫자별로 한 장씩)
-    const rankDeck = []; // 계급 결정용 카드 덱
+    const participants = room.participants;
+    const playerCount = participants.length;
+
+    // 1~10 숫자 덱 생성 및 셔플
+    const rankDeck = [];
     for (let i = 1; i <= 10; i++) {
         rankDeck.push(i);
     }
-    
-    // 덱 셔플
-    const shuffledRankDeck = shuffleArray(rankDeck); // rankDeck셔플
-    const rankNamesforFourPlayers = [
-        'nubjuki',    // 1등 - 넙죽이
-        'lkh',        // 2등 - 이광형
-        'over-year',  // 9등 - 연차초과자
-        'grad'        // 10등 - 대학원생
-    ];
-    const rankNamesforFivePlayers = [
-        'nubjuki',    // 1등 - 넙죽이
-        'lkh',        // 2등 - 이광형
-        'rsy',        // 3등 - 류석영
-        'over-year',  // 4등 - 연차초과자
-        'grad'        // 5등 - 대학원생
-    ];
-    const rankNamesforSixPlayers = [
-        'nubjuki',    // 1등 - 넙죽이
-        'lkh',        // 2등 - 이광형
-        'rsy',        // 3등 - 류석영
-        'prof',       // 4등 - 교수
-        'over-year',  // 5등 - 연차초과자
-        'grad'        // 6등 - 대학원생
-    ];
-    // 각 플레이어에게 카드 분배
-    participants.forEach((player, index) => {
-        const rankCard = shuffledRankDeck[index]; // 임시 변수로만 사용
-        
-        // 참가자 수별 계급 설정
-        if (playerCount === 4) {
-            // 4명 플레이
-            if (rankCard === 1) {
-                player.rank = 'nubjuki';    // 1번 - 넙죽이
-            } else if (rankCard === 2) {
-                player.rank = 'lkh';        // 2번 - 이광형
-            } else if (rankCard === 3) {
-                player.rank = 'over-year';  // 3번 - 연차초과자
-            } else if (rankCard === 4) {
-                player.rank = 'grad';       // 4번 - 대학원생
-            }
-        } else if (playerCount === 5) {
-            // 5명 플레이
-            const rankNamesforFivePlayers = [
-                'nubjuki',    // 1등 - 넙죽이
-                'lkh',        // 2등 - 이광형
-                'rsy',        // 3등 - 류석영
-                'over-year',  // 4등 - 연차초과자
-                'grad'        // 5등 - 대학원생
-            ];
-            player.rank = rankNamesforFivePlayers[rankCard - 1];
-        } else if (playerCount === 6) {
-            // 6명 플레이
-            const rankNamesforSixPlayers = [
-                'nubjuki',    // 1등 - 넙죽이
-                'lkh',        // 2등 - 이광형
-                'rsy',        // 3등 - 류석영
-                'prof',       // 4등 - 교수
-                'over-year',  // 5등 - 연차초과자
-                'grad'        // 6등 - 대학원생
-            ];
-            player.rank = rankNamesforSixPlayers[rankCard - 1];
-        } else {
-            // 지원하지 않는 인원수
-            throw new Error(`지원하지 않는 플레이어 수입니다: ${playerCount}명 (4-6명만 지원)`);
-        }
+    const shuffledRankDeck = shuffleArray(rankDeck);
+
+    // 카드 숫자와 이름 매핑
+    const cardNameMap = {
+        1: '넙죽이',
+        2: '이광형',
+        3: '류석영',
+        4: '교수',
+        5: '새내기',
+        6: '6번',
+        7: '7번',
+        8: '8번',
+        9: '연차초과자',
+        10: '대학원생'
+    };
+
+    // 참가자별로 카드 분배 및 결과 생성
+    const result = participants.map((player, idx) => {
+        const cardNumber = shuffledRankDeck[idx];
+        const cardName = cardNameMap[cardNumber];
+        player.rankCard = cardNumber;
+        player.rank = cardName;
+        return {
+            success: true,
+            cardName,
+            message: `당신의 카드는 ${cardName}입니다`
+        };
     });
 
-    return {
-        success: true,
-        message: '계급 결정 완료',
-        // 프론트엔드와 추후 협업 필요. 필요한 정보 구상 요함
-    }
+    return result;
 }
 
 /**
@@ -109,11 +67,11 @@ function setRanksByRoundResult() {
     const playerCount = roundResult.length;
     let rankNames;
     if (playerCount === 4) {
-        rankNames = ['nubjuki', 'lkh', 'over-year', 'grad'];
+        rankNames = ['넙죽이', '이광형', '연차초과자', '대학원생'];
     } else if (playerCount === 5) {
-        rankNames = ['nubjuki', 'lkh', 'rsy', 'over-year', 'grad'];
+        rankNames = ['넙죽이', '이광형', '류석영', '연차초과자', '대학원생'];
     } else if (playerCount === 6) {
-        rankNames = ['nubjuki', 'lkh', 'rsy', 'prof', 'over-year', 'grad'];
+        rankNames = ['넙죽이', '이광형', '류석영', '교수', '연차초과자', '대학원생'];
     } else {
         throw new Error(`지원하지 않는 플레이어 수입니다: ${playerCount}명 (4~6명만 지원)`);
     }
@@ -158,11 +116,11 @@ function setTurnOrder() {
     const playerCount = room.participants.length;
     let rankNames;
     if (playerCount === 4) {
-        rankNames = ['nubjuki', 'lkh', 'over-year', 'grad'];
+        rankNames = ['넙죽이', '이광형', '연차초과자', '대학원생'];
     } else if (playerCount === 5) {
-        rankNames = ['nubjuki', 'lkh', 'rsy', 'over-year', 'grad'];
+        rankNames = ['넙죽이', '이광형', '류석영', '연차초과자', '대학원생'];
     } else if (playerCount === 6) {
-        rankNames = ['nubjuki', 'lkh', 'rsy', 'prof', 'over-year', 'grad'];
+        rankNames = ['넙죽이', '이광형', '류석영', '교수', '연차초과자', '대학원생'];
     } else {
         throw new Error(`지원하지 않는 플레이어 수입니다: ${playerCount}명 (4~6명만 지원)`);
     }

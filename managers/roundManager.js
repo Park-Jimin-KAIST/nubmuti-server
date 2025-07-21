@@ -20,6 +20,10 @@ function isAllPassed() {
     return passCount === totalPlayers - 1;
 }
 
+function startRound() {
+    return { message: `${room.gameState.round}라운드 시작` };
+}
+
 /**
  * 카드 내기
  * @param {string} playerId 제출 버튼을 누른 참가자의 소켓 ID

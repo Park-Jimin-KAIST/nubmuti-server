@@ -42,8 +42,6 @@ function startGame(playerId) {
     return { 
         success: true, 
         message: '게임이 시작되었습니다.',
-        gameState: room.gameState,
-        roomInfo: getRoomInfo()
     };
 }
 
