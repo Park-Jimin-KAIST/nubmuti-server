@@ -9,9 +9,10 @@ function handleRoomEvents(ws, wss) {
             sendError(ws, '메시지 파싱 오류', parsed?.error);
             return;
         }
-        const { type, data } = parsed; //프론트엔드에서 넘어온 정보
+        const { signal, data } = parsed; //프론트엔드에서 넘어온 정보
+        console.log("signal", signal)
 
-        switch (type) {
+        switch (signal) {
             case PACKET_TYPE.CREATE_ROOM:
                 const createResult = createRoom(ws, data.nickname);
                 sendToClient(ws, PACKET_TYPE.CREATE_ROOM, createResult);
