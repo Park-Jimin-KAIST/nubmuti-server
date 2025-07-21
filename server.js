@@ -14,10 +14,10 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 // 핸들러들 import
-const { handleRoomEvents } = require('./socket/handler/roomHandler');
-const { handleGameEvents } = require('./socket/handler/gameHandler');
-const { handleRoundEvents } = require('./socket/handler/roundHandler');
-const { handleCommonEvents } = require('./socket/handler/commonHandler');
+const { handleRoomEvents } = require('./handler/roomHandler');
+const { handleGameEvents } = require('./handler/gameHandler');
+const { handleRoundEvents } = require('./handler/roundHandler');
+// const { handleCommonEvents } = require('./handler/commonHandler');
 
 // 서버 에러 처리
 server.on('error', (error) => {

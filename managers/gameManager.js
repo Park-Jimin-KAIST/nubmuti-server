@@ -1,5 +1,5 @@
-const { room, initRoom } = require('../roomManager');
-const { getRoomInfo } = require('../roomManager');
+const { room, initRoom } = require('./roomManager');
+const { getRoomInfo } = require('./roomManager');
 const { shuffleDeck, dealCards } = require('./initManager');
 const { deck } = require('../data');
 
@@ -19,7 +19,7 @@ function startGame(ws) {
     }
 
     // 최소 인원 체크
-    if (!room.flags.isEnoughPlayers) {
+    if (!room.isEnoughPlayers()) {
         return { 
             success: false, 
             message: `최소 4명 이상 필요합니다.` 

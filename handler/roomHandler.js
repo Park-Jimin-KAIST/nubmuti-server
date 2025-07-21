@@ -1,4 +1,4 @@
-const { PACKET_TYPE } = require('../socket/event');
+const { PACKET_TYPE } = require('../socket/packetType');
 const { enterRoom, getRoomInfo, createRoom, leaveRoom, isReady, isHost } = require('../managers/roomManager');
 const { sendToClient, parseMessage, sendError, broadcastToAll } = require('../socket/websocketUtils');
 

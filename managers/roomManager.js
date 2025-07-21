@@ -13,8 +13,10 @@ const room = {
         isRoomCreated: false, // 방 생성 여부
         isGameStarted: false, // 게임 시작 여부
         isExchangePhase: false, // 카드 교환 단계 여부
-        exchangeCount: 0, // 카드 교환 횟수
-        isEnoughPlayers: room.participants.length >= room.minPlayers, // 최소 인원 이상 최대 인원 이하인지 여부
+        exchangeCount: 0, // 카드 교환 횟수 
+    },
+    isEnoughPlayers() {
+        return this.participants.length >= this.minPlayers;
     },
     finishedPlayers:[]
 };

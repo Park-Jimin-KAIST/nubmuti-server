@@ -24,7 +24,7 @@ const PACKET_TYPE = {
     FIRST_ROUND_RULES: 1022, // 1라운드 규칙 알려주는 UI "첫번째 라운드는 무작위로 분배된 카11드의 랭크대로 순서가 정해집니다"
     SHUFFLE_CARDS: 1023, // 카드 섞는 UI
     DEAL_ONE_CARD: 1024, // 카드를 한장만 나눠주는 애니메이션
-    UPDATE_HAND: 1025, // 카드 분배 안내 "카드를 분배합니다"
+    UPDATE_HAND: 1025, // 카드 분배 안내 "드를 분배합니다"
     YOUR_CARD: 1026, // 무작위로 나에게 분배된 카드를 나타내는 UI "당신의 카드는 이광형입니다"
     YOUR_RANK: 1103, // 내 계급 안내 "$room.gameState.round번째 라운드 당신의 계급은 이광형입니다"
     YOUR_ORDER: 1104, // 내 순서 안내 "순서는 2번째입니다"
@@ -41,6 +41,8 @@ const PACKET_TYPE = {
     ALL_PASSED: 1115, // 모두 패스했을 때 알려주는 UI
     END_TURN: 1116, // 이 시그널 받고 YOUR_TURN UI 비활성화
     DONE_ROUND: 1028, // 특정 참가자가 카드를 다 내거나, 꼴찌가 됐을 때 알려주는 UI
+    PILE_UPDATE: 1029, // 플레이 도중 플레이어들이 낸 (버린) 카드 배열 업데이트
+    HAS_PASSED: 1030, // 특정 참가자가 패스했을 때 알려주는 UI
 
     // Exeption
     INVALID_CARD: 1030, // 카드 숫자가 안 맞을 때, 카드 개수가 안 맞을 때, 카드 제출이 성공했을 때 UI

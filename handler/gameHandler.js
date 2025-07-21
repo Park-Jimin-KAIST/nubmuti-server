@@ -1,4 +1,4 @@
-const { PACKET_TYPE } = require('../socket/event');
+const { PACKET_TYPE } = require('../socket/packetType');
 const { sendToClient, parseMessage, sendError, broadcastToAll } = require('../socket/websocketUtils');
 const { startGame, endGame, readyGame, isGameOver } = require('../managers/gameManager');
 

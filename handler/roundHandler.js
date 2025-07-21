@@ -1,5 +1,5 @@
 // 필요한 모듈 import
-const { PACKET_TYPE } = require('../socket/event');
+const { PACKET_TYPE } = require('../socket/packetType');
 const { deck } = require('../data');
 const { startGame, endGame, readyGame, isGameOver } = require('../managers/gameManager');
 const { room } = require('../managers/roomManager');
@@ -206,6 +206,7 @@ function handleRoundEvents(ws, wss) {
 
             case PACKET_TYPE.PLAY_CARD:
                 playCard(ws, data.cards);
+                broadcastToAll(wss, PACKET_TYPE.PILE_UPDATE, { cards: room.gameState.table.pile[-1] });
                 sendUpdateHandAll(room.participants);
                 if (room.gameState.turn.currentPlayer.hand.length === 0) {
                     const { nickname, message } = excludeFinishedPlayer(ws);
@@ -227,6 +228,7 @@ function handleRoundEvents(ws, wss) {
                 break;
 
             case PACKET_TYPE.PASS:
+                broadcastToAll(wss, PACKET_TYPE.HAS_PASSED, { message: `${room.participants.find(p => p.ws === ws).nickname} 패스` });
                 pass(ws);
                 nextTurn();
                 const nextPlayerWs2 = room.gameState.turn.currentPlayer.ws;
