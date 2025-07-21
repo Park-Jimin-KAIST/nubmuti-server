@@ -8,6 +8,7 @@ const PACKET_TYPE = {
     // Room
     ENTER_ROOM: 1001, //입장하기 버튼, 닉네임 입력란
     LEAVE_ROOM: 1002, // 뒤로 가기 버튼
+    GET_ROOM_INFO: 1003,
     CREATE_ROOM: 1004,
     YOU_ARE_HOST: 1005, // 방장 - 게임 시작하기 버튼이 있는 UI
     READY_GAME: 1006, // 시작하기 버튼이 활성화된 UI

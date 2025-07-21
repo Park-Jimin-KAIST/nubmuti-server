@@ -5,22 +5,22 @@ const WebSocket = require('ws');
 /**
  * 단일 클라이언트에게 메시지 전송
  * @param {WebSocket} ws 클라이언트 소켓
- * @param {string} type 이벤트 타입 i.e. YOUR_TURN, GAME_START, GAME_END, etc.
+ * @param {int} signal 이벤트 타입 i.e. YOUR_TURN, GAME_START, GAME_END, etc.
  * @param {any} data 전송할 데이터 i.e. { playerId, cards }
  */
-function sendToClient(ws, type, data) {
-    const message = JSON.stringify({ type, data });
+function sendToClient(ws, signal, data) {
+    const message = JSON.stringify({ signal, data });
     ws.send(message);
 }
 
 /**
  * 모든 클라이언트에게 메시지 전송
  * @param {WebSocket.Server} wss 웹소켓 서버
- * @param {string} type 이벤트 타입 i.e. YOUR_TURN, GAME_START, GAME_END, etc.
+ * @param {int} signal 이벤트 타입 i.e. YOUR_TURN, GAME_START, GAME_END, etc.
  * @param {any} data 전송할 데이터 i.e. { playerId, cards }
  */
-function broadcastToAll(wss, type, data) {
-    const message = JSON.stringify({ type, data });
+function broadcastToAll(wss, signal, data) {
+    const message = JSON.stringify({ signal, data });
     wss.clients.forEach((ws) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(message);

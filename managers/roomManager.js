@@ -46,8 +46,8 @@ function getRoomInfo() {
         name: room.name,
         maxPlayers: room.maxPlayers,
         hostWS: room.hostWS,
-        participantCount: room.gameState.participants.length,
-        participants: room.gameState.participants.map(p => ({
+        participantCount: room.participants.length,
+        participants: room.participants.map(p => ({
             id: p.id,
             name: p.name,
             isReady: p.isReady,
@@ -87,7 +87,7 @@ function createRoom(ws, nickname) {
     // 첫 번째 참가자를 방장으로 설정
     room.hostWS = ws;
     newPlayer.isHost = true;
-    room.gameState.participants.push(newPlayer);
+    room.participants.push(newPlayer);
     room.flags.isRoomCreated = true;
 
     return { 
@@ -114,7 +114,7 @@ function enterRoom(ws, nickname) {
     }
 
     // 방이 가득 찬 경우
-    if (room.gameState.participants.length >= room.maxPlayers) {
+    if (room.participants.length >= room.maxPlayers) {
         return { 
             success: false, 
             message: '방이 가득 찼습니다.' 
@@ -122,7 +122,7 @@ function enterRoom(ws, nickname) {
     }
 
     // 이미 입장한 플레이어인 경우
-    const existingPlayer = room.gameState.participants.find(p => p.ws === ws);
+    const existingPlayer = room.participants.find(p => p.ws === ws);
     if (existingPlayer) {
         return { 
             success: false, 
@@ -142,7 +142,7 @@ function enterRoom(ws, nickname) {
     const newPlayer = new Player(ws, nickname);
 
     // 참가자 목록에 추가
-    room.gameState.participants.push(newPlayer);
+    room.participants.push(newPlayer);
 
     return { 
         success: true, 
@@ -166,7 +166,7 @@ function isReady() {
  */
 function leaveRoom(ws) {
     // 방에 입장하지 않은 플레이어인 경우
-    const playerIndex = room.gameState.participants.findIndex(p => p.ws === ws);
+    const playerIndex = room.participants.findIndex(p => p.ws === ws);
     if (playerIndex === -1) {
         return { 
             success: false
@@ -174,16 +174,17 @@ function leaveRoom(ws) {
     }
 
     // 플레이어 제거
-    const removedPlayer = room.gameState.participants.splice(playerIndex, 1)[0];
+    room.participants.splice(playerIndex, 1)[0];
+    console.log(room.participants.length);
 
     // 방장이 나간 경우, 다음 플레이어를 방장으로 설정
-    if (room.hostWS === ws && room.gameState.participants.length > 0) {
-        room.hostWS = room.gameState.participants[0].ws;
-        room.gameState.participants[0].isHost = true;
+    if (room.hostWS === ws && room.participants.length > 0) {
+        room.hostWS = room.participants[0].ws;
+        room.participants[0].isHost = true;
     }
 
     // 모든 플레이어가 나간 경우 방 초기화
-    if (room.gameState.participants.length === 0) {
+    if (room.participants.length === 0) {
         initRoom();
     }
 
@@ -198,7 +199,7 @@ function leaveRoom(ws) {
  * @returns {boolean} 방장 여부
  */
 function isHost(ws) {
-    const player = room.gameState.participants.find(p => p.ws === ws);
+    const player = room.participants.find(p => p.ws === ws);
     return player.isHost;
 }
 module.exports = {
