@@ -156,12 +156,13 @@ function setTurnOrder() {
     }
 
     // rankNames 순서대로 플레이어 정렬
-    const sortedPlayers = rankNames
+    const order = rankNames
         .map(rank => room.participants.find(p => p.rank === rank))
-        .filter(Boolean); // 혹시 누락된 플레이어가 있으면 제외
+        .filter(Boolean) // 혹시 누락된 플레이어가 있으면 제외
+        .map(p => p.id);
 
     // 턴 순서(order)만 세팅
-    room.gameState.turn.order = sortedPlayers.map(p => p.id);
+    room.gameState.turn.order = order;
     room.gameState.turn.currentPlayer = room.gameState.turn.order[0]; // 첫 번째 플레이어로 초기화
 }
 
