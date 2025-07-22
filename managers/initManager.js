@@ -159,7 +159,7 @@ function setTurnOrder() {
     const order = rankNames
         .map(rank => room.participants.find(p => p.rank === rank))
         .filter(Boolean) // 혹시 누락된 플레이어가 있으면 제외
-        .map(p => p.id);
+        .map(p => p.nickname);
 
     // 턴 순서(order)만 세팅
     room.gameState.turn.order = order;

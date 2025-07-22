@@ -61,7 +61,7 @@ function startGameSequence(wss) {
                                 setTurnOrder();
                                 // 각 참가자에게 자신의 순서를 안내
                                 sendEachClient(room.participants, PACKET_TYPE.YOUR_ORDER, (player) => {
-                                    const order = room.gameState.turn.order.indexOf(player.id) + 1; // 1번부터 시작
+                                    const order = room.gameState.turn.order.indexOf(player.nickname) + 1; // 1번부터 시작
                                     return {
                                         order,
                                         message: `당신의 순서는 ${order}번째 입니다`
