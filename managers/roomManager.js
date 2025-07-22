@@ -200,8 +200,10 @@ function leaveRoom(ws) {
  */
 function isHost(ws) {
     const player = room.participants.find(p => p.ws === ws);
+    if (!player) return false;
     return player.isHost;
 }
+
 module.exports = {
     room,
     createRoom,

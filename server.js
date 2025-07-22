@@ -1,6 +1,9 @@
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
+const { room } = require('./managers/roomManager');
+const { broadcastToAll } = require('./socket/websocketUtils');
+const { PACKET_TYPE } = require('./socket/packetType');
 
 // Express 앱 설정
 const app = express();
@@ -45,7 +48,7 @@ wss.on('connection', (ws) => {
     // 연결 해제 처리
     ws.on('close', () => {
         console.log('클라이언트 연결 해제');
-        handlePlayerDisconnect(ws.clientId);
+        handlePlayerDisconnect(ws);
     });
     
     // 에러 처리
@@ -61,3 +64,19 @@ server.listen(PORT, () => {
     console.log(`- HTTP 서버: http://localhost:${PORT}`);
     console.log(`- WebSocket 서버: ws://localhost:${PORT}`);
 });
+
+// 클라이언트 연결 해제 시 호출되는 함수
+function handlePlayerDisconnect(ws) {
+    console.log(`[Disconnect] 클라이언트 연결 해제됨: clientId = ${ws}`);
+    // TODO: 실제로 참가자 목록에서 제거 등 필요한 로직을 여기에 추가
+    // 참가자 목록에서 해당 ws를 가진 참가자 제거
+    const idx = room.participants.findIndex(p => p.ws === ws);
+    if (idx !== -1) {
+        room.participants.splice(idx, 1);
+        console.log(`[Disconnect] 참가자 목록에서 제거됨 (index: ${idx})`);
+        console.log(room.participants.length);
+        broadcastToAll(wss, PACKET_TYPE.PLAYER_COUNT_CHANGED, { participantCount: room.participants.length, maxPlayers: room.maxPlayers });
+    } else {
+        console.log('[Disconnect] 해당 ws를 가진 참가자를 찾지 못했습니다.');
+    }
+}

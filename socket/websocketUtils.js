@@ -106,11 +106,11 @@ function updateClientInfo(ws, info) {
  * @param {string} type 이벤트 타입
  * @param {function} dataFn (player) => data  // 각 플레이어별로 보낼 데이터를 반환하는 함수
  */
-function sendEachClient(participants, type, dataFn) {
+function sendEachClient(participants, signal, dataFn) {
     participants.forEach(player => {
         if (player.ws && player.ws.readyState === WebSocket.OPEN) {
             const data = dataFn(player);
-            sendToClient(player.ws, type, data);
+            sendToClient(player.ws, signal, data);
         }
     });
 }

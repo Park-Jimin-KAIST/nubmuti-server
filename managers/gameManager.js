@@ -27,12 +27,12 @@ function startGame(ws) {
     }
 
     // 게임이 이미 진행 중인 경우
-    if (room.flags.isGameStarted) {
-        return { 
-            success: false, 
-            message: '게임이 이미 진행 중입니다.' 
-        };
-    }
+    // if (room.flags.isGameStarted) {
+    //     return { 
+    //         success: false, 
+    //         message: '게임이 이미 진행 중입니다.' 
+    //     };
+    // }
 
     // 게임 시작
     room.flags.isGameStarted = true;

@@ -9,9 +9,9 @@ function handleGameEvents(ws, wss) {
             sendError(ws, '메시지 파싱 오류', parsed?.error);
             return;
         }
-        const { type, data } = parsed;
-
-        switch (type) {
+        const { signal, data } = parsed;
+        console.log("signal", signal)
+        switch (signal) {
             case PACKET_TYPE.START_GAME:
                 const startResult = startGame(ws);
                 broadcastToAll(wss, PACKET_TYPE.START_GAME, startResult);

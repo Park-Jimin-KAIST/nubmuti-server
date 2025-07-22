@@ -44,7 +44,8 @@ const PACKET_TYPE = {
     DONE_ROUND: 1028, // 특정 참가자가 카드를 다 내거나, 꼴찌가 됐을 때 알려주는 UI
     PILE_UPDATE: 1029, // 플레이 도중 플레이어들이 낸 (버린) 카드 배열 업데이트
     HAS_PASSED: 1030, // 특정 참가자가 패스했을 때 알려주는 UI
-
+    ALL_INFO: 1031, // 모든 정보 알려주는 UI
+    
     // Exeption
     INVALID_CARD: 1030, // 카드 숫자가 안 맞을 때, 카드 개수가 안 맞을 때, 카드 제출이 성공했을 때 UI
     OUT_OF_TURN: 1031, // 현재 턴이 아닐 때 알려주는 UI

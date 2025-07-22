@@ -4,7 +4,7 @@ const { deck } = require('../data');
 const { startGame, endGame, readyGame, isGameOver } = require('../managers/gameManager');
 const { room } = require('../managers/roomManager');
 const { startRound, playCard, pass, nextTurn, endRound } = require('../managers/roundManager');
-const { dealRankCards, setTurnOrder, dealCards, exchangeCards } = require('../managers/initManager');
+const { assignRanksByRankCard, dealRankCards, setTurnOrder, dealCards, exchangeCards, shuffleDeck } = require('../managers/initManager');
 const { sendToClient, broadcastToAll, parseMessage, sendError, sendEachClient, sendUpdateHand, sendUpdateHandAll } = require('../socket/websocketUtils');
 
 /**
@@ -28,7 +28,15 @@ function startGameSequence(wss) {
                 // 4. DEAL_ONE_CARD (애니메이션 끝나면, 예: 1.5초 후)
                 setTimeout(() => {
                     broadcastToAll(wss, PACKET_TYPE.DEAL_ONE_CARD, { message: '카드를 한장씩 분배합니다' });
-
+                    const order = room.gameState.turn.order.map(nickname =>
+                        room.participants.findIndex(p => p.nickname === nickname)
+                      );
+                    broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
+                        nicknames: room.participants.map(p => p.nickname),
+                        hands: room.participants.map(p => p.hand),
+                        ranks: room.participants.map(p => p.rank),
+                        order: order
+                    });
                     // 5. YOUR_CARD (애니메이션 끝나면, 예: 1.5초 후)
                     setTimeout(() => {
                         // 각 플레이어별 카드 정보 보내기
@@ -61,7 +69,7 @@ function startGameSequence(wss) {
 
                                     // 9. DEAL_CARDS (애니메이션 끝나면, 예: 1.5초 후)
                                     setTimeout(() => {
-                                        dealCards(shuffleDeck(deck));
+                                        dealCards(shuffleDeck(deck.cards));
                                         setTurnOrder();
                                         broadcastToAll(wss, PACKET_TYPE.DEAL_CARDS, { message: '카드를 분배합니다' });
                                         setTimeout(() => {
@@ -100,7 +108,7 @@ function startGameSequence(wss) {
 
         }, 2000);
 
-    }, 1000);
+    }, 10000);
 }
 
 /**
@@ -115,13 +123,15 @@ function handleRoundEvents(ws, wss) {
             sendError(ws, '메시지 파싱 오류', parsed?.error);
             return;
         }
-        const { type, data } = parsed;
-
-        switch (type) {
+        const { signal, data } = parsed;
+        console.log("signal", signal)
+        switch (signal) {
             case PACKET_TYPE.START_GAME:
                 const startResult = startGame(ws);
                 broadcastToAll(wss, PACKET_TYPE.START_GAME, startResult);
-                startGameSequence(wss); // 시퀀스 시작!
+                if (startResult.success) {
+                    startGameSequence(wss); // 시퀀스 시작!
+                }
                 break;
             
             case PACKET_TYPE.NEW_ROUND:
@@ -206,8 +216,8 @@ function handleRoundEvents(ws, wss) {
 
             case PACKET_TYPE.PLAY_CARD:
                 playCard(ws, data.cards);
-                broadcastToAll(wss, PACKET_TYPE.PILE_UPDATE, { cards: room.gameState.table.pile[-1] });
                 sendUpdateHandAll(room.participants);
+                broadcastToAll(wss, PACKET_TYPE.PILE_UPDATE, { cards: room.gameState.table.pile[-1] });
                 if (room.gameState.turn.currentPlayer.hand.length === 0) {
                     const { nickname, message } = excludeFinishedPlayer(ws);
                     broadcastToAll(wss, PACKET_TYPE.DONE_ROUND, { message: `${nickname}님이 라운드를 끝냈습니다!` });
@@ -223,6 +233,12 @@ function handleRoundEvents(ws, wss) {
                 }
                 sendToClient(ws, PACKET_TYPE.END_TURN, { isTurnOver: true });
                 nextTurn();
+                broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
+                    nicknames: room.participants.map(p => p.nickname),
+                    hands: room.participants.map(p => p.hand),
+                    ranks: room.participants.map(p => p.rank),
+                    order: order
+                });
                 const nextPlayerWs1 = room.gameState.turn.currentPlayer.ws;
                 sendToClient(nextPlayerWs1, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
                 break;
@@ -231,6 +247,12 @@ function handleRoundEvents(ws, wss) {
                 broadcastToAll(wss, PACKET_TYPE.HAS_PASSED, { message: `${room.participants.find(p => p.ws === ws).nickname} 패스` });
                 pass(ws);
                 nextTurn();
+                broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
+                    nicknames: room.participants.map(p => p.nickname),
+                    hands: room.participants.map(p => p.hand),
+                    ranks: room.participants.map(p => p.rank),
+                    order: order
+                });
                 const nextPlayerWs2 = room.gameState.turn.currentPlayer.ws;
                 if (isAllPassed()) {
                     sendToClient(nextPlayerWs2, PACKET_TYPE.ALL_PASSED, { message: '모두 패스했습니다. 아무 카드나 내세요' });
