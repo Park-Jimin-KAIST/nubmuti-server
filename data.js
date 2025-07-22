@@ -25,7 +25,7 @@ function Player(ws, nickname) {
 }
 
 const cards = {
-    number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 'Goose' | 'Duck',
+    number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11| 12,
     type: 'single' | 'double' | 'triple' | 'quad' | 'five' | 'six' | 'seven' | 'eight' | 'nine' | 'ten' | 'eleven',
 }
 
@@ -70,7 +70,7 @@ const deck = {
             8, 8, 8, 8, 8, 8, 8, 8, 
             9, 9, 9, 9, 9, 9, 9, 9, 9, 
             10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-            'Goose', 'Duck']
+            11, 12]
 };
 
 module.exports = {

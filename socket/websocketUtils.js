@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+const { PACKET_TYPE } = require('./packetType');
 
 // 메시지 전송 함수들
 
@@ -123,7 +124,7 @@ function sendEachClient(participants, signal, dataFn) {
 function sendUpdateHand(ws, hand) {
     if (ws && ws.readyState === WebSocket.OPEN) {
         const sortedHand = hand.slice().sort((a, b) => a - b);
-        sendToClient(ws, 'UPDATE_HAND', { hand: sortedHand });
+        sendToClient(ws, PACKET_TYPE.UPDATE_HAND, { hand: sortedHand });
     }
 }
 
@@ -132,7 +133,7 @@ function sendUpdateHand(ws, hand) {
  * @param {Array} participants 참가자 배열 (각 객체에 ws, hand가 있어야 함)
  */
 function sendUpdateHandAll(participants) {
-    sendEachClient(participants, 'UPDATE_HAND', (player) => {
+    sendEachClient(participants, PACKET_TYPE.UPDATE_HAND, (player) => {
         const sortedHand = player.hand.slice().sort((a, b) => a - b);
         return { hand: sortedHand };
     });
