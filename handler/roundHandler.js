@@ -87,19 +87,21 @@ function startRoundSequence(wss) {
         // 순서 변경: 먼저 ALL_INFO, 그 다음 ROUND_STARTED
         setTimeout(() => { 
             broadcastToAll(wss, PACKET_TYPE.NEXT_PAGE, { success: true });
-            sendEachClient(room.participants, PACKET_TYPE.ROUND_STARTED, (player) => ({
-                success: true,
-                message: '라운드가 시작되었습니다',
-                nickname: player.nickname
-            }));
-            // broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
-            //     nicknames: room.participants.map(p => p.nickname),
-            //     hands: room.participants.map(p => p.hand),
-            //     ranks: room.participants.map(p => p.rank),
-            //     order: room.gameState.turn.order.map(nickname =>
-            //         room.participants.findIndex(p => p.nickname === nickname)
-            //     )
-            // });
+            setTimeout(()=>{
+                sendEachClient(room.participants, PACKET_TYPE.ROUND_STARTED, (player) => ({
+                    success: true,
+                    message: '라운드가 시작되었습니다',
+                    nickname: player.nickname
+                }));
+                broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
+                    nicknames: room.participants.map(p => p.nickname),
+                    hands: room.participants.map(p => p.hand),
+                    ranks: room.participants.map(p => p.rank),
+                    order: room.gameState.turn.order.map(nickname =>
+                        room.participants.findIndex(p => p.nickname === nickname)
+                )
+                });
+            },2000);
             setTimeout(() => {
                 dealCards(shuffleDeck(deck.cards));
                 broadcastToAll(wss, PACKET_TYPE.DEAL_CARDS, { message: '카드를 분배합니다' });
