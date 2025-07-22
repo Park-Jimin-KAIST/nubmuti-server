@@ -111,6 +111,7 @@ function sendEachClient(participants, signal, dataFn) {
     participants.forEach(player => {
         if (player.ws && player.ws.readyState === WebSocket.OPEN) {
             const data = dataFn(player);
+            console.log(data);
             sendToClient(player.ws, signal, data);
         }
     });

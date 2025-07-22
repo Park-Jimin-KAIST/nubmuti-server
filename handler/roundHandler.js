@@ -59,6 +59,8 @@ function startGameSequence(wss) {
 
                             setTimeout(() => {
                                 setTurnOrder();
+                                // console.log(room.gameState.turn.order);
+                                // console.log(room.gameState.turn.currentPlayer);
                                 // 각 참가자에게 자신의 순서를 안내
                                 sendEachClient(room.participants, PACKET_TYPE.YOUR_ORDER, (player) => {
                                     const order = room.gameState.turn.order.indexOf(player.nickname) + 1; // 1번부터 시작
@@ -133,6 +135,7 @@ function handleRoundEvents(ws, wss) {
         }
         const { signal, data } = parsed;
         console.log("signal", signal)
+        // const player = room.participants.find(p => p.ws === ws);
         switch (signal) {
             case PACKET_TYPE.START_GAME:
                 const startResult = startGame(ws);
@@ -157,23 +160,26 @@ function handleRoundEvents(ws, wss) {
             case PACKET_TYPE.THROW_SUBMIT: {
                 // data: { cards: [...] }
                 const player = room.participants.find(p => p.ws === ws);
+                console.log(player.nickname);
+                console.log(player.rank);
                 if (!player) {
                     sendError(ws, '플레이어 정보를 찾을 수 없습니다.');
                     break;
                 }
-
+                console.log("플레이어 찾음")
+                player.submittedCards = data.cards;
+                console.log(player.submittedCards);
                 // 제출 카드 유효성 검사
                 if (player.rank === '넙죽이' && (!data.cards || data.cards.length !== 2)) {
-                    sendError(ws, '넙죽이는 반드시 2장의 카드를 선택해야 합니다.');
+                    sendToClient(ws, PACKET_TYPE.SUBMIT_ERROR, { message: '넙죽이는 반드시 2장의 카드를 선택해야 합니다.' });
                     break;
                 }
                 if (player.rank === '이광형' && (!data.cards || data.cards.length !== 1)) {
-                    sendError(ws, '이광형은 반드시 1장의 카드를 선택해야 합니다.');
+                    sendToClient(ws, PACKET_TYPE.SUBMIT_ERROR, { message: '이광형은 반드시 1장의 카드를 선택해야 합니다.' });
                     break;
                 }
 
                 // 제출 카드 저장
-                player.submittedCards = data.cards;
 
                 // 모든 제출이 끝났는지 확인 (넙죽이, 이광형만 체크)
                 const nubjuki = room.participants.find(p => p.rank === '넙죽이');
@@ -182,6 +188,7 @@ function handleRoundEvents(ws, wss) {
                     // 아직 제출 안 한 사람이 있으면 대기
                     break;
                 }
+                console.log("Both submitted");
 
                 // 꼴찌(대학원생)와 그 다음 꼴찌(연차초과자) 찾기
                 const grad = room.participants.find(p => p.rank === '대학원생');
@@ -223,10 +230,16 @@ function handleRoundEvents(ws, wss) {
                 // 제출 카드 정보 초기화
                 nubjuki.submittedCards = null;
                 lkh.submittedCards = null;
-
+                
                 // 교환 완료 시그널 등 추가
                 broadcastToAll(wss, PACKET_TYPE.EXCHANGE_DONE, { message: '카드 교환이 완료되었습니다. 첫번째 플레이어는 카드를 제출해주세요' });
+                room.participants.forEach(p => {
+                    console.log(p.hand);
+                });
                 sendUpdateHandAll(room.participants);
+                setTimeout(() => {
+                    broadcastToAll(wss, PACKET_TYPE.YOUR_TURN, { nickname: room.gameState.turn.currentPlayer, message: `${room.gameState.turn.currentPlayer}님의 턴입니다`});
+                }, 2000);
                 break;
             }
 
@@ -260,13 +273,14 @@ function handleRoundEvents(ws, wss) {
                     )
                 });
                 const nextPlayerWs1 = room.gameState.turn.currentPlayer.ws;
-                sendToClient(nextPlayerWs1, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
+                broadcastToAll(wss, PACKET_TYPE.YOUR_TURN, { nickname: room.gameState.turn.currentPlayer.nickname, message: `${room.gameState.turn.currentPlayer.nickname}님의 턴입니다`});
                 break;
 
             case PACKET_TYPE.PASS:
                 broadcastToAll(wss, PACKET_TYPE.HAS_PASSED, { message: `${room.participants.find(p => p.ws === ws).nickname} 패스` });
                 pass(ws);
                 nextTurn();
+                broadcastToAll(wss, PACKET_TYPE.YOUR_TURN, { nickname: room.gameState.turn.currentPlayer.nickname, message: `${room.gameState.turn.currentPlayer.nickname}님의 턴입니다`});
                 broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
                     nicknames: room.participants.map(p => p.nickname),
                     hands: room.participants.map(p => p.hand),

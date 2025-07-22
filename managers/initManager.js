@@ -164,6 +164,8 @@ function setTurnOrder() {
     // 턴 순서(order)만 세팅
     room.gameState.turn.order = order;
     room.gameState.turn.currentPlayer = room.gameState.turn.order[0]; // 첫 번째 플레이어로 초기화
+    console.log(room.gameState.turn.order);
+    console.log(room.gameState.turn.currentPlayer);
 }
 
 /**
