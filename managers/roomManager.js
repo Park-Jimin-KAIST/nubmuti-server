@@ -89,6 +89,7 @@ function createRoom(ws, nickname) {
     newPlayer.isHost = true;
     room.participants.push(newPlayer);
     room.flags.isRoomCreated = true;
+    
 
     return { 
         success: true,

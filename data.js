@@ -21,6 +21,7 @@ function Player(ws, nickname) {
     this.rank = null; // 계급: 1 ~ # of players
     this.hasPasses = false; // 현재 턴에서의 패스 여부
     this.isHost = false; // 방장 여부
+    this.isReady = false;
 }
 
 const cards = {

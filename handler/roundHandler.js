@@ -67,9 +67,9 @@ function startGameSequence(wss) {
                                         message: `당신의 순서는 ${order}번째 입니다`
                                     };
                                 });
-                            }, 2000)
+                            }, 3000)
 
-                        }, 2000);
+                        }, 3000);
 
                     }, 1500);
 
@@ -79,6 +79,39 @@ function startGameSequence(wss) {
 
         }, 2000);
 
+    }, 2000);
+}
+
+function startRoundSequence(wss) {
+    setTimeout(() => {
+        // 순서 변경: 먼저 ALL_INFO, 그 다음 ROUND_STARTED
+        broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
+            nicknames: room.participants.map(p => p.nickname),
+            hands: room.participants.map(p => p.hand),
+            ranks: room.participants.map(p => p.rank),
+            order: room.gameState.turn.order.map(nickname =>
+                room.participants.findIndex(p => p.nickname === nickname)
+            )
+        });
+        setTimeout(() => { 
+            sendEachClient(room.participants, PACKET_TYPE.ROUND_STARTED, (player) => ({
+                success: true,
+                message: '라운드가 시작되었습니다',
+                nickname: player.nickname
+            }));
+        // setTimeout(() => {
+        //     dealCards(shuffleDeck(deck.cards));
+        //     broadcastToAll(wss, PACKET_TYPE.DEAL_CARDS, { message: '카드를 분배합니다' });
+        //     sendUpdateHandAll(room.participants);
+        //     setTimeout(() => {
+        //         broadcastToAll(wss, PACKET_TYPE.EXCHANGE_INFO, { message: '넙죽이와 이광형은 버릴 카드를 선택하세요' });
+        //         setTimeout(() => {
+        //             sendEachClient(room.participants, PACKET_TYPE.EXCHANGE_INFO_2, (player) => ({
+        //                 nubjukOrLkh: player.rank === '넙죽이' || player.rank === '이광형'
+        //             }));
+        //         }, 2000);
+        //     }, 2000);
+        }, 2000);
     }, 2000);
 }
 
@@ -105,8 +138,16 @@ function handleRoundEvents(ws, wss) {
                 }
                 break;
             
-            case PACKET_TYPE.NEW_ROUND:
-                startGameSequence(wss);
+            // case PACKET_TYPE.NEW_ROUND:
+            //     startGameSequence(wss);
+            //     break;
+
+            case PACKET_TYPE.ROUND_STARTED:
+                const player = room.participants.find(p => p.ws === ws);
+                player.isReady = true;
+                if (room.participants.every(p => p.isReady)) {
+                    startRoundSequence(wss);
+                }
                 break;
 
             case PACKET_TYPE.THROW_SUBMIT: {
