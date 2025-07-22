@@ -85,32 +85,34 @@ function startGameSequence(wss) {
 function startRoundSequence(wss) {
     setTimeout(() => {
         // 순서 변경: 먼저 ALL_INFO, 그 다음 ROUND_STARTED
-        broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
-            nicknames: room.participants.map(p => p.nickname),
-            hands: room.participants.map(p => p.hand),
-            ranks: room.participants.map(p => p.rank),
-            order: room.gameState.turn.order.map(nickname =>
-                room.participants.findIndex(p => p.nickname === nickname)
-            )
-        });
         setTimeout(() => { 
+            broadcastToAll(wss, PACKET_TYPE.NEXT_PAGE, { success: true });
             sendEachClient(room.participants, PACKET_TYPE.ROUND_STARTED, (player) => ({
                 success: true,
                 message: '라운드가 시작되었습니다',
                 nickname: player.nickname
             }));
-        // setTimeout(() => {
-        //     dealCards(shuffleDeck(deck.cards));
-        //     broadcastToAll(wss, PACKET_TYPE.DEAL_CARDS, { message: '카드를 분배합니다' });
-        //     sendUpdateHandAll(room.participants);
-        //     setTimeout(() => {
-        //         broadcastToAll(wss, PACKET_TYPE.EXCHANGE_INFO, { message: '넙죽이와 이광형은 버릴 카드를 선택하세요' });
-        //         setTimeout(() => {
-        //             sendEachClient(room.participants, PACKET_TYPE.EXCHANGE_INFO_2, (player) => ({
-        //                 nubjukOrLkh: player.rank === '넙죽이' || player.rank === '이광형'
-        //             }));
-        //         }, 2000);
-        //     }, 2000);
+            // broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
+            //     nicknames: room.participants.map(p => p.nickname),
+            //     hands: room.participants.map(p => p.hand),
+            //     ranks: room.participants.map(p => p.rank),
+            //     order: room.gameState.turn.order.map(nickname =>
+            //         room.participants.findIndex(p => p.nickname === nickname)
+            //     )
+            // });
+            setTimeout(() => {
+                dealCards(shuffleDeck(deck.cards));
+                broadcastToAll(wss, PACKET_TYPE.DEAL_CARDS, { message: '카드를 분배합니다' });
+                sendUpdateHandAll(room.participants);
+                setTimeout(() => {
+                    broadcastToAll(wss, PACKET_TYPE.EXCHANGE_INFO, { message: '넙죽이와 이광형은 버릴 카드를 선택하세요' });
+                    setTimeout(() => {
+                        sendEachClient(room.participants, PACKET_TYPE.EXCHANGE_INFO_2, (player) => ({
+                            nubjukOrLkh: player.rank === '넙죽이' || player.rank === '이광형'
+                        }));
+                    }, 2000);
+                }, 2000);
+            }, 2000);
         }, 2000);
     }, 2000);
 }
@@ -230,16 +232,18 @@ function handleRoundEvents(ws, wss) {
                 playCard(ws, data.cards);
                 sendUpdateHandAll(room.participants);
                 broadcastToAll(wss, PACKET_TYPE.PILE_UPDATE, { cards: room.gameState.table.pile[-1] });
-                if (room.gameState.turn.currentPlayer.hand.length === 0) {
-                    const { nickname, message } = excludeFinishedPlayer(ws);
-                    broadcastToAll(wss, PACKET_TYPE.DONE_ROUND, { message: `${nickname}님이 라운드를 끝냈습니다!` });
-                    if (room.participants.length === 1) {
-                        endRound();
-                        if (isGameOver()) {
-                            endGame();
-                            broadcastToAll(wss, PACKET_TYPE.END_GAME, { message: '게임이 종료되었습니다' });
-                        } else {
-                            broadcastToAll(wss, PACKET_TYPE.END_ROUND, { message: `${room.gameState.round}라운드를 끝냈습니다` });
+               if (!room.gameState.turn.currentPlayer) {
+                    if (room.gameState.turn.currentPlayer.hand.length === 0) {
+                        const { nickname, message } = excludeFinishedPlayer(ws);
+                        broadcastToAll(wss, PACKET_TYPE.DONE_ROUND, { message: `${nickname}님이 라운드를 끝냈습니다!` });
+                        if (room.participants.length === 1) {
+                            endRound();
+                            if (isGameOver()) {
+                                endGame();
+                                broadcastToAll(wss, PACKET_TYPE.END_GAME, { message: '게임이 종료되었습니다' });
+                            } else {
+                                broadcastToAll(wss, PACKET_TYPE.END_ROUND, { message: `${room.gameState.round}라운드를 끝냈습니다` });
+                            }
                         }
                     }
                 }
@@ -249,7 +253,9 @@ function handleRoundEvents(ws, wss) {
                     nicknames: room.participants.map(p => p.nickname),
                     hands: room.participants.map(p => p.hand),
                     ranks: room.participants.map(p => p.rank),
-                    order: order
+                    order: room.gameState.turn.order.map(nickname =>
+                        room.participants.findIndex(p => p.nickname === nickname)
+                    )
                 });
                 const nextPlayerWs1 = room.gameState.turn.currentPlayer.ws;
                 sendToClient(nextPlayerWs1, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
@@ -263,7 +269,9 @@ function handleRoundEvents(ws, wss) {
                     nicknames: room.participants.map(p => p.nickname),
                     hands: room.participants.map(p => p.hand),
                     ranks: room.participants.map(p => p.rank),
-                    order: order
+                    order: room.gameState.turn.order.map(nickname =>
+                        room.participants.findIndex(p => p.nickname === nickname)
+                    )
                 });
                 const nextPlayerWs2 = room.gameState.turn.currentPlayer.ws;
                 if (isAllPassed()) {
