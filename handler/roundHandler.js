@@ -31,13 +31,13 @@ function startGameSequence(wss) {
                     const order = room.gameState.turn.order.map(nickname =>
                         room.participants.findIndex(p => p.nickname === nickname)
                       );
-                    broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
-                        nicknames: room.participants.map(p => p.nickname),
-                        hands: room.participants.map(p => p.hand),
-                        ranks: room.participants.map(p => p.rank),
-                        order: order
-                    });
-                    // 5. YOUR_CARD (애니메이션 끝나면, 예: 1.5초 후)
+                    // broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
+                    //     nicknames: room.participants.map(p => p.nickname),
+                    //     hands: room.participants.map(p => p.hand),
+                    //     ranks: room.participants.map(p => p.rank),
+                    //     order: order
+                    // });
+                   // 5. YOUR_CARD (애니메이션 끝나면, 예: 1.5초 후)
                     setTimeout(() => {
                         // 각 플레이어별 카드 정보 보내기
                         // 예시: dealRankCards() 결과를 각자에게
@@ -56,47 +56,17 @@ function startGameSequence(wss) {
                                 message: `당신의 계급은 ${player.rank}입니다`
                             }));
 
-                            // 7. ROUND_STARTED (2초 후) ← 바로 다음 단계로 이동
                             setTimeout(() => {
-                                broadcastToAll(wss, PACKET_TYPE.ROUND_STARTED, {
-                                    round: room.gameState.round,
-                                    message: `${room.gameState.round}라운드가 시작되었습니다`
+                                setTurnOrder();
+                                // 각 참가자에게 자신의 순서를 안내
+                                sendEachClient(room.participants, PACKET_TYPE.YOUR_ORDER, (player) => {
+                                    const order = room.gameState.turn.order.indexOf(player.id) + 1; // 1번부터 시작
+                                    return {
+                                        order,
+                                        message: `당신의 순서는 ${order}번째 입니다`
+                                    };
                                 });
-
-                                // 8. SHUFFLE_CARDS (2초 후)
-                                setTimeout(() => {
-                                    broadcastToAll(wss, PACKET_TYPE.SHUFFLE_CARDS, { message: '카드를 섞는 중입니다' });
-
-                                    // 9. DEAL_CARDS (애니메이션 끝나면, 예: 1.5초 후)
-                                    setTimeout(() => {
-                                        dealCards(shuffleDeck(deck.cards));
-                                        setTurnOrder();
-                                        broadcastToAll(wss, PACKET_TYPE.DEAL_CARDS, { message: '카드를 분배합니다' });
-                                        setTimeout(() => {
-                                            sendUpdateHandAll(room.participants);
-                                        }, 2000);
-                                        // 10. EXCHANGE_PHASE (애니메이션 끝나면, 예: 1.5초 후)
-                                        setTimeout(() => {
-                                            broadcastToAll(wss, PACKET_TYPE.EXCHANGE_PHASE, { message: '카드 교환 단계입니다' });
-
-                                            // 11. EXCHANGE_INFO (2초 후)
-                                            setTimeout(() => {
-                                                broadcastToAll(wss, PACKET_TYPE.EXCHANGE_INFO, { message: '넙죽이와 이광형은 버릴 카드를 선택하세요' });
-
-                                                // 12. EXCHANGE_INFO_2 (2초 후)
-                                                setTimeout(() => {
-                                                    broadcastToAll(wss, PACKET_TYPE.EXCHANGE_INFO_2, { message: '교환 UI' });
-                                                }, 2000);
-
-                                            }, 2000);
-
-                                        }, 1500);
-
-                                    }, 1500);
-
-                                }, 2000);
-
-                            }, 2000);
+                            }, 2000)
 
                         }, 2000);
 
@@ -108,7 +78,7 @@ function startGameSequence(wss) {
 
         }, 2000);
 
-    }, 10000);
+    }, 2000);
 }
 
 /**

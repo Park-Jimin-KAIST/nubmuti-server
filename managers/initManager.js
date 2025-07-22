@@ -42,6 +42,7 @@ function dealRankCards() {
         const cardNumber = shuffledRankDeck[idx];
         player.rankCard = cardNameMap[cardNumber];
         player.rankCardNumber = cardNumber; // 필요시 숫자도 저장
+        // player.rank = cardNameMap[cardNumber]; // 이 줄 추가!
     });
 }
 /**
