@@ -44,6 +44,7 @@ function startGameSequence(wss) {
                         // participants.forEach(p => sendToClient(p.ws, PACKET_TYPE.YOUR_CARD, ...));
                         dealRankCards();
                         sendEachClient(room.participants, PACKET_TYPE.YOUR_CARD, (player) => ({
+                            cardNumber: player.rankCardNumber,
                             cardName: player.rankCard,
                             message: `당신의 카드는 ${player.rankCard}입니다`
                         }));
