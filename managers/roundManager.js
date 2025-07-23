@@ -39,6 +39,7 @@ function playCard(ws, cards) {
     // 2. Check validity of the cards
     const isValid = validatePlay(cards);
     if (!isValid.success) {
+        //작동 못함
         sendToClient(ws, PACKET_TYPE.INVALID_CARD, { message: isValid.message });
         return { success: false, message: isValid.message };
     }

@@ -140,6 +140,10 @@ function sendUpdateHandAll(participants) {
     });
 }
 
+function showMessage(ws, message) {
+    sendToClient(ws, PACKET_TYPE.SHOW_MESSAGE, { message });
+}
+
 
 /** */
 module.exports = {
@@ -152,5 +156,6 @@ module.exports = {
     updateClientInfo,
     sendEachClient,
     sendUpdateHand,
-    sendUpdateHandAll
+    sendUpdateHandAll,
+    showMessage
 }

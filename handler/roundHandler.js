@@ -218,6 +218,7 @@ function handleRoundEvents(ws, wss) {
                 // 연차초과자 카드 제거
                 const overIdx = overYear.hand.indexOf(overYearBest);
                 if (overIdx !== -1) overYear.hand.splice(overIdx, 1);
+
                 // 서로 교환
                 lkh.hand.push(overYearBest);
                 overYear.hand.push(...lkh.submittedCards);
@@ -235,7 +236,14 @@ function handleRoundEvents(ws, wss) {
             }
 
             case PACKET_TYPE.PLAY_CARD:
-                playCard(ws, data.cards);
+                const playResult = playCard(ws, data.cards);
+                if (playResult.success) {
+                    sendToClient(ws, PACKET_TYPE.INVALID_CARD, { success: true, message: playResult.message });
+                } else {
+                    sendToClient(ws, PACKET_TYPE.INVALID_CARD, { success: false, message: playResult.message });
+                    break;
+                }
+                console.log("data.cards", data.cards);
                 passCount = 0;
                 sendUpdateHandAll(room.participants);
                 // 마지막으로 push된 cards 정보를 가져옵니다.
