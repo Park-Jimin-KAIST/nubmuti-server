@@ -166,11 +166,11 @@ function handleRoundEvents(ws, wss) {
 
                 // 제출 카드 유효성 검사
                 if (player.rank === '넙죽이' && (!data.cards || data.cards.length !== 2)) {
-                    sendError(ws, '넙죽이는 반드시 2장의 카드를 선택해야 합니다.');
+                    sendToClient(ws, PACKET_TYPE.SHOW_MESSAGE, { success: false, message: '넙죽이는 반드시 2장의 카드를 선택해야 합니다.' });
                     break;
                 }
                 if (player.rank === '이광형' && (!data.cards || data.cards.length !== 1)) {
-                    sendError(ws, '이광형은 반드시 1장의 카드를 선택해야 합니다.');
+                    sendToClient(ws, PACKET_TYPE.SHOW_MESSAGE, { success: false, message: '이광형은 반드시 1장의 카드를 선택해야 합니다.' });
                     break;
                 }
 
@@ -236,7 +236,10 @@ function handleRoundEvents(ws, wss) {
             }
 
             case PACKET_TYPE.PLAY_CARD:
+                const currentPlayer = room.participants.find(p => p.nickname === room.gameState.turn.currentPlayer);
                 const playResult = playCard(ws, data.cards);
+                console.log("Sent Signal to next player")
+                console.log(currentPlayer.nickname);
                 if (playResult.success) {
                     sendToClient(ws, PACKET_TYPE.INVALID_CARD, { success: true, message: playResult.message });
                 } else {
@@ -270,7 +273,6 @@ function handleRoundEvents(ws, wss) {
                     }
                 }
                 sendToClient(ws, PACKET_TYPE.END_TURN, { isTurnOver: true });
-                nextTurn();
                 broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
                     nicknames: room.participants.map(p => p.nickname),
                     hands: room.participants.map(p => p.hand),
@@ -279,18 +281,24 @@ function handleRoundEvents(ws, wss) {
                         room.participants.findIndex(p => p.nickname === nickname)
                     )
                 });
+                sendToClient(ws, PACKET_TYPE.UPDATE_HAND, { hand: currentPlayer.hand });
                 console.log("room.gameState.turn.currentPlayer", room.gameState.turn.currentPlayer);
                 // 아니요, room.gameState.turn.currentPlayer가 nickname(string)일 경우 .ws를 붙이면 undefined가 나옵니다.
                 // 만약 currentPlayer가 string(nickname)이라면, 해당 nickname을 가진 참가자 객체를 찾아서 .ws를 사용해야 합니다.
                 // 예시:
-                const currentPlayerObj = room.participants.find(p => p.nickname === room.gameState.turn.currentPlayer);
-                const nextPlayerWs1 = currentPlayerObj ? currentPlayerObj.ws : undefined;
-                //const nextPlayerWs1 = room.gameState.turn.currentPlayer.ws;
-                sendToClient(nextPlayerWs1, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
-                // 모든 Client에게 현재 누구의 턴인지 보내줌
-                broadcastToAll(wss, PACKET_TYPE.CURRENT_TURN, { 
-                    nickname: room.gameState.turn.currentPlayer
+                // const nextPlayerWs1 = currentPlayerObj ? currentPlayerObj.ws : undefined;
+                // //const nextPlayerWs1 = room.gameState.turn.currentPlayer.ws;
+                // sendToClient(nextPlayerWs1, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
+                // // 모든 Client에게 현재 누구의 턴인지 보내줌
+                const currentPlayer2 = room.gameState.turn.currentPlayer;
+                room.participants.forEach(p => {
+                    if (p.nickname !== currentPlayer) { // 또는 p.id !== currentPlayer.id, p.ws !== currentPlayer.ws 등 상황에 맞게
+                        sendToClient(p.ws, PACKET_TYPE.CURRENT_TURN, { 
+                            nickname: currentPlayer
+                        });
+                    }
                 });
+                sendToClient(room.participants.find(p => p.nickname === currentPlayer2).ws, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
                 break;
 
             case PACKET_TYPE.PASS:

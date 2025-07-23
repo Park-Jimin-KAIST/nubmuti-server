@@ -47,16 +47,19 @@ function playCard(ws, cards) {
     }
 
     // 3. Put the cards on the table
+
     room.gameState.table.pile.push(cards);
 
     // 4. Remove the cards from the player's hand
     const player = room.participants.find(p => p.ws === ws);
+    console.log("player.hand", player.hand);
     cards.forEach(card => {
         const index = player.hand.indexOf(card);
         if (index !== -1) {
             player.hand.splice(index, 1);
         }
     });
+    console.log("player.hand", player.hand);
     // const isDone = player.hand.length === 0;
     // if (isDone) {
     //     excludeFinishedPlayer(ws);
@@ -102,7 +105,7 @@ function pass(ws) {
     //     room.gameState.turn.passCount = 0;
     //     return { success: true, message: '모두 패스했습니다'};
     // }
-
+    console.log(room.gameState.turn.passCount);
     return { success: true, message: '패스했습니다'};
 }
 
@@ -132,8 +135,10 @@ function nextTurn() {
 
 function validatePlay(cards) {
     // 1. IfAllPassed, always return true
-    if (isAllPassed()) {
-        return { success: true, message: '모두 패스했습니다'};
+    console.log("passcount: ", room.gameState.turn.passCount);
+    if (room.gameState.turn.passCount === room.participants.length - 1) {
+        console.log("All Passed so valid");
+        return { success: true, message: '카드를 내었습니다'};
     }
 
     // 2. Check the last cards on the table
