@@ -1,4 +1,6 @@
 const { room } = require('./roomManager');
+const { sendToClient } = require('../socket/websocketUtils');
+const { PACKET_TYPE } = require('../socket/packetType');
 
 function getCurrentPlayer() {
     const currentId = room.gameState.turn.currentPlayer;
@@ -33,7 +35,7 @@ function startRound() {
  */
 function playCard(ws, cards) {
     // 1. Check if it's the player's turn
-    if (room.gameState.turn.currentPlayer.ws !== ws) {
+    if (room.gameState.turn.currentPlayer !== room.participants.find(p => p.ws === ws).nickname) {
         return { success: false, message: '당신의 턴이 아닙니다'};
     }
     // 2. Check validity of the cards
@@ -59,10 +61,12 @@ function playCard(ws, cards) {
     // if (isDone) {
     //     excludeFinishedPlayer(ws);
     // }
+    nextTurn();
+    const isDone = player.hand.length === 0;
 
     // 5. Next turn
     room.gameState.turn.passCount = 0; // Reset pass count after a card is played
-    return { success: true, message: '카드를 내었습니다', isDone, ws }; // 추후 프론트엔드와 논의 후 게임 스테이트 반환 여부 결정
+    return { success: true, message: '카드를 내었습니다', isDone: isDone, ws }; // 추후 프론트엔드와 논의 후 게임 스테이트 반환 여부 결정
 }
 
 // roundHandler.js
@@ -106,13 +110,15 @@ function pass(ws) {
  * 턴 넘기기
  */
 function nextTurn() {
+    console.log("nextTurn DEBUG");
     const order = room.gameState.turn.order;
+    console.log("order:", order);
     const idx = order.indexOf(room.gameState.turn.currentPlayer);
 
     // 현재 플레이어를 맨 뒤로 보냄
     const [current] = order.splice(idx, 1);
     order.push(current);
-
+    console.log("order:", order);
 
     // 다음 턴 플레이어는 맨 앞
     room.gameState.turn.currentPlayer = order[0];
@@ -133,9 +139,12 @@ function validatePlay(cards) {
     // 2. Check the last cards on the table
     const pile = room.gameState.table.pile;
     const lastPlay = pile[pile.length - 1];
+    if (pile.length === 0) {
+        return { success: true, message: '카드를 내었습니다'};
+    }
 
     // 3. Check the number of the cards the the current player has submitted
-    if (cards.length !== lastPlay.cards.length) {
+    if (cards.length !== lastPlay.length) {
         return { success: false, message: '카드 개수가 맞지 않습니다'};
     }
 
@@ -154,10 +163,10 @@ function validatePlay(cards) {
         myNumber = Math.min(...nonJokerNumbers);
     }
     let tableNumber ;
-    if (lastPlay.cards.every(isJoker)) {
+    if (lastPlay.every(isJoker)) {
         tableNumber = 11;
     } else {
-        const nonJokerNumbers = lastPlay.cards.filter(card => !isJoker(card));
+        const nonJokerNumbers = lastPlay.filter(card => !isJoker(card));
         tableNumber = Math.min(...nonJokerNumbers);
     }
 

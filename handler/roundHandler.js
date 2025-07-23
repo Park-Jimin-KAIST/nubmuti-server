@@ -229,8 +229,8 @@ function handleRoundEvents(ws, wss) {
 
                 // 교환 완료 시그널 등 추가
                 broadcastToAll(wss, PACKET_TYPE.EXCHANGE_DONE, { message: '카드 교환이 완료되었습니다. 첫번째 플레이어는 카드를 제출해주세요' });
-                const firstPlayer = room.participants.find(p => p.rank === '넙죽이');
-                sendToClient(firstPlayer.ws, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
+                console.log(room.gameState.turn.currentPlayer);
+                sendToClient(room.participants.find(p => p.nickname === room.gameState.turn.currentPlayer).ws, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
                 sendUpdateHandAll(room.participants);
                 break;
             }
