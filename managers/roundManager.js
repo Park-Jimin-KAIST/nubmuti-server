@@ -17,6 +17,7 @@ function getCurrentPlayer() {
 function isAllPassed() {
     const passCount = room.gameState.turn.passCount || 0;
     const totalPlayers = room.participants.length;
+    
     return passCount === totalPlayers - 1;
 }
 
@@ -43,7 +44,7 @@ function playCard(ws, cards) {
     }
 
     // 3. Put the cards on the table
-    room.gameState.table.pile.push({ ws, cards });
+    room.gameState.table.pile.push(cards);
 
     // 4. Remove the cards from the player's hand
     const player = room.participants.find(p => p.ws === ws);
@@ -111,6 +112,7 @@ function nextTurn() {
     const [current] = order.splice(idx, 1);
     order.push(current);
 
+
     // 다음 턴 플레이어는 맨 앞
     room.gameState.turn.currentPlayer = order[0];
 }
@@ -142,7 +144,7 @@ function validatePlay(cards) {
      * 조커 카드가 포함되어 있을 때, 제출한 카드 배열의 길이가 1이면(조커 카드만 제출했을 때) 조커 카드의 숫자는 11이다.
      * 조커 카드가 포함되어 있지 않으면 그냥 카드의 숫자가 맞는지 확인
      */
-    const isJoker = card => card === 'Goose' || card === 'Duck';
+    const isJoker = card => card === 11 || card === 12;
     let myNumber;
     if (cards.every(isJoker)) {
         myNumber = 11;
@@ -255,5 +257,6 @@ module.exports = {
     playCard,
     pass,
     nextTurn,
-    endRound
+    endRound,
+    isAllPassed,
 }

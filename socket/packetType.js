@@ -47,6 +47,7 @@ const PACKET_TYPE = {
     ALL_INFO: 1031, // 모든 정보 알려주는 UI
     NEXT_PAGE: 1032, // 다음 페이지로 넘어가는 UI
     SUBMIT_ERROR: 1033, // 카드 제출 실패 시 알려주는 UI
+    CURRENT_TURN: 1034, // 현재 턴 알려주는 UI
     
     // Exeption
     INVALID_CARD: 1030, // 카드 숫자가 안 맞을 때, 카드 개수가 안 맞을 때, 카드 제출이 성공했을 때 UI
