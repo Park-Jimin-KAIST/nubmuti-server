@@ -1,5 +1,5 @@
 const { room } = require('./roomManager');
-const { sendToClient } = require('../socket/websocketUtils');
+const { sendToClient, broadcastToAll } = require('../socket/websocketUtils');
 const { PACKET_TYPE } = require('../socket/packetType');
 
 function getCurrentPlayer() {
@@ -39,13 +39,16 @@ function playCard(ws, cards) {
         return { success: false, message: '당신의 턴이 아닙니다'};
     }
     // 2. Check validity of the cards
-    const isValid = validatePlay(cards);
-    if (!isValid.success) {
-        //작동 못함
-        sendToClient(ws, PACKET_TYPE.INVALID_CARD, { message: isValid.message });
-        return { success: false, message: isValid.message };
+    if (room.gameState.turn.passCount === room.participants.length - 1) {
+        return { success: true, message: '카드를 내었습니다'};
+    } else {
+            const isValid = validatePlay(cards);
+            if (!isValid.success) {
+                //작동 못함
+                sendToClient(ws, PACKET_TYPE.INVALID_CARD, { message: isValid.message });
+                return { success: false, message: isValid.message };
+            }
     }
-
     // 3. Put the cards on the table
 
     room.gameState.table.pile.push(cards);
@@ -84,17 +87,24 @@ function playCard(ws, cards) {
 /**
  * 패스
  * @param {WebSocket} ws
+ * @param {WebSocketServer} wss
  * @returns {Object}
  */
-function pass(ws) {
+function pass(ws, wss) {
     // 1. Check if it's the player's turn
-    if (room.gameState.turn.currentPlayer.ws !== ws) {
+    if (room.participants.find(p => p.ws === ws).nickname !== room.gameState.turn.currentPlayer) {
         return { success: false, message: '당신의 턴이 아닙니다'};
     }
 
     // 2. Pass
     room.gameState.turn.currentPlayer.hasPasses = true;
     room.gameState.turn.passCount++;
+    if (room.gameState.turn.passCount === room.participants.length - 1) {
+        room.gameState.table.pile = [];
+        room.gameState.turn.passCount = 0;
+        broadcastToAll(wss, PACKET_TYPE.ALL_PASSED, { message: '모두 패스했습니다.' });
+        return { success: true, message: '모두 패스했습니다'};
+    }
 
     // 3. Next turn
     // nextTurn();

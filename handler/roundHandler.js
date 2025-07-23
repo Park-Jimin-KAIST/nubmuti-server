@@ -238,6 +238,11 @@ function handleRoundEvents(ws, wss) {
             case PACKET_TYPE.PLAY_CARD:
                 const currentPlayer = room.participants.find(p => p.nickname === room.gameState.turn.currentPlayer);
                 const playResult = playCard(ws, data.cards);
+                if (playResult.isDone) {
+                    broadcastToAll(wss, PACKET_TYPE.DONE_ROUND, { message: `${currentPlayer.nickname}님이 라운드를 끝냈습니다!` });
+                }
+                const nextPlayer = room.participants.find(p => p.nickname === room.gameState.turn.currentPlayer);
+                sendToClient(nextPlayer.ws, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
                 console.log("Sent Signal to next player")
                 console.log(currentPlayer.nickname);
                 if (playResult.success) {
@@ -247,7 +252,6 @@ function handleRoundEvents(ws, wss) {
                     break;
                 }
                 console.log("data.cards", data.cards);
-                passCount = 0;
                 sendUpdateHandAll(room.participants);
                 // 마지막으로 push된 cards 정보를 가져옵니다.
                 // 네, 가능합니다. request를 보낸 사람(ws) 빼고 나머지 모든 참가자에게만 보내려면 아래처럼 하면 됩니다.
@@ -303,35 +307,39 @@ function handleRoundEvents(ws, wss) {
 
             case PACKET_TYPE.PASS:
                 broadcastToAll(wss, PACKET_TYPE.HAS_PASSED, { message: `${room.participants.find(p => p.ws === ws).nickname} 패스` });
-                pass(ws);
-                nextTurn();
+                if (pass(ws, wss).success) {
+                    console.log("passCount after pass(ws) ", room.gameState.turn.passCount);
+                    console.log("Pile Update Sent to all players")
+                    
+                    nextTurn();
+                    
+                    broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
+                        nicknames: room.participants.map(p => p.nickname),
+                        hands: room.participants.map(p => p.hand),
+                        ranks: room.participants.map(p => p.rank),
+                        order: room.gameState.turn.order.map(nickname =>
+                            room.participants.findIndex(p => p.nickname === nickname)
+                        )
+                    });
+                    //const nextPlayerWs2 = room.gameState.turn.currentPlayer.ws;
+                    const nextPlayerWs2 = room.participants.find(p => p.nickname === room.gameState.turn.currentPlayer).ws;
+                    console.log("passCount", room.gameState.turn.passCount);
+                    if (room.gameState.turn.passCount === room.participants.length - 1) {
+                        sendToClient(nextPlayerWs2, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
+                        broadcastToAll(wss, PACKET_TYPE.CURRENT_TURN, { 
+                            nickname: room.gameState.turn.currentPlayer
+                        });
+                    } else {
+                        sendToClient(nextPlayerWs2, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
+                        broadcastToAll(wss, PACKET_TYPE.CURRENT_TURN, { 
+                            nickname: room.gameState.turn.currentPlayer
+                        });
+                    }
+                    break;
+    
+
+                };
                 
-                broadcastToAll(wss, PACKET_TYPE.ALL_INFO, { 
-                    nicknames: room.participants.map(p => p.nickname),
-                    hands: room.participants.map(p => p.hand),
-                    ranks: room.participants.map(p => p.rank),
-                    order: room.gameState.turn.order.map(nickname =>
-                        room.participants.findIndex(p => p.nickname === nickname)
-                    )
-                });
-                passCount++;
-                //const nextPlayerWs2 = room.gameState.turn.currentPlayer.ws;
-                const currentPlayerObj2 = room.participants.find(p => p.nickname === room.gameState.turn.currentPlayer);
-                const nextPlayerWs2 = currentPlayerObj2 ? currentPlayerObj2.ws : undefined;
-                console.log("passCount", passCount);
-                if (passCount === room.participants.length - 1) {
-                    sendToClient(nextPlayerWs2, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
-                    broadcastToAll(wss, PACKET_TYPE.ALL_PASSED, { message: '모두 패스했습니다.' });
-                    broadcastToAll(wss, PACKET_TYPE.CURRENT_TURN, { 
-                        nickname: room.gameState.turn.currentPlayer
-                    });
-                } else {
-                    sendToClient(nextPlayerWs2, PACKET_TYPE.YOUR_TURN, { message: '당신의 턴입니다' });
-                    broadcastToAll(wss, PACKET_TYPE.CURRENT_TURN, { 
-                        nickname: room.gameState.turn.currentPlayer
-                    });
-                }
-                break;
 
         }
     });
